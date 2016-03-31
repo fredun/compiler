@@ -62,7 +62,7 @@ parseType =
 parseTypeBinding :: Parser Syntax.Binding
 parseTypeBinding = do
   _ <- Lexer.keyword "type"
-  i <- Lexer.identifier
+  i <- Lexer.typeName
   _ <- Lexer.symbol "="
   t <- parseType
   return (Syntax.TypeBinding i t)

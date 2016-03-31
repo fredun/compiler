@@ -68,10 +68,10 @@ spec = do
       let res = parse
                   Parser.parseBinding
                   "foo.fn"
-                  "type bar = (Foo, Bar)"
+                  "type X = (Foo, Bar)"
       res `shouldBe`
         Right
-          ( Syntax.TypeBinding "bar"
+          ( Syntax.TypeBinding "X"
             ( Syntax.TupleType
               ( Syntax.Tuple
                 [ Syntax.TypeReference "Foo"
@@ -85,10 +85,10 @@ spec = do
       let res = parse
                   Parser.parseBinding
                   "foo.fn"
-                  "type bar = {x: Foo, y: Bar}"
+                  "type X = {x: Foo, y: Bar}"
       res `shouldBe`
         Right
-          ( Syntax.TypeBinding "bar"
+          ( Syntax.TypeBinding "X"
             ( Syntax.RecordType
               ( Syntax.Record
                 ( Map.fromList
