@@ -18,9 +18,12 @@ cabal-version:       >=1.10
 
 executable fredun-compiler
   main-is:             Main.hs
-  other-modules:       Lexer
+  other-modules:       Lexer,
+                       Syntax,
+                       Parser
   -- other-extensions:
-  build-depends:       base >=4.8 && <4.9,
+  build-depends:       base,
+                       containers,
                        megaparsec,
                        text
   hs-source-dirs:      src
