@@ -16,15 +16,32 @@ build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
 
-executable fredun-compiler
-  main-is:             Main.hs
-  other-modules:       Lexer,
+library
+  exposed-modules:     Lexer,
                        Syntax,
                        Parser
-  -- other-extensions:
   build-depends:       base,
                        containers,
                        megaparsec,
                        text
   hs-source-dirs:      src
+  default-language:    Haskell2010
+
+executable fredun-compiler
+  main-is:             Main.hs
+  -- other-extensions:
+  build-depends:       base,
+                       fredun-compiler
+  hs-source-dirs:      app
+  default-language:    Haskell2010
+
+Test-Suite test
+  type:                exitcode-stdio-1.0
+  main-is:             Main.hs
+  build-depends:       base,
+                       containers,
+                       fredun-compiler,
+                       hspec,
+                       megaparsec
+  hs-source-dirs:      test
   default-language:    Haskell2010
