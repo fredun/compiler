@@ -23,17 +23,21 @@ spec = do
                   "{a: Foo, b: {c: Bar, d: Baz}}"
       res `shouldBe`
         Right
-          (Syntax.RecordType
-            (Map.fromList
-              [ ("a", Syntax.TypeReference "Foo")
-              , ("b", Syntax.RecordType
-                  (Map.fromList
-                    [ ("c", Syntax.TypeReference "Bar")
-                    , ("d", Syntax.TypeReference "Baz")
-                    ]
+          ( Syntax.RecordType
+            ( Syntax.Record
+              ( Map.fromList
+                [ ( "a", Syntax.TypeReference "Foo" )
+                , ( "b", Syntax.RecordType
+                    ( Syntax.Record
+                      ( Map.fromList
+                        [ ( "c", Syntax.TypeReference "Bar" )
+                        , ( "d", Syntax.TypeReference "Baz" )
+                        ]
+                      )
+                    )
                   )
-                )
-              ]
+                ]
+              )
             )
           )
 
@@ -44,12 +48,16 @@ spec = do
                   "(Foo, Bar, (Baz, Quux))"
       res `shouldBe`
         Right
-          (Syntax.TupleType
-            [ Syntax.TypeReference "Foo"
-            , Syntax.TypeReference "Bar"
-            , Syntax.TupleType
-              [ Syntax.TypeReference "Baz"
-              , Syntax.TypeReference "Quux"
+          ( Syntax.TupleType
+            ( Syntax.Tuple
+              [ Syntax.TypeReference "Foo"
+              , Syntax.TypeReference "Bar"
+              , Syntax.TupleType
+                ( Syntax.Tuple
+                  [ Syntax.TypeReference "Baz"
+                  , Syntax.TypeReference "Quux"
+                  ]
+                )
               ]
-            ]
+            )
           )

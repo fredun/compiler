@@ -3,8 +3,14 @@ module Syntax where
 import Data.Map (Map)
 import Data.Text (Text)
 
+data Tuple a = Tuple [a]
+  deriving (Eq, Ord, Show)
+
+data Record a = Record (Map String a)
+  deriving (Eq, Ord, Show)
+
 data Type =
     TypeReference String
-  | TupleType [Type]
-  | RecordType (Map String Type)
+  | TupleType (Tuple Type)
+  | RecordType (Record Type)
   deriving (Eq, Ord, Show)

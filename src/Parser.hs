@@ -9,37 +9,50 @@ import Text.Megaparsec.Text
 import qualified Syntax
 import qualified Lexer
 
--- * Types
+-- * Records
 
-parseTypeReference :: Parser Syntax.Type
-parseTypeReference =
-  Syntax.TypeReference
-    <$> Lexer.typeName
-
-parseTypeMapping :: Parser (String, Syntax.Type)
-parseTypeMapping = do
+parseRecordMapping :: Parser a -> Parser (String, a)
+parseRecordMapping parseA = do
   field <- Lexer.identifier
   _ <- Lexer.colon
-  value <- parseType
+  value <- parseA
   return (field, value)
 
-parseTypeMappings :: Parser (Map String Syntax.Type)
-parseTypeMappings =
+parseRecordMappings :: Parser a -> Parser (Map String a)
+parseRecordMappings parseA =
   Map.fromList
-    <$> Lexer.commaSeparated parseTypeMapping
+    <$> Lexer.commaSeparated (parseRecordMapping parseA)
 
-parseRecordType :: Parser Syntax.Type
-parseRecordType =
-  Syntax.RecordType
-    <$> Lexer.curly parseTypeMappings
+parseRecord :: Parser a -> Parser (Syntax.Record a)
+parseRecord parseA =
+  Syntax.Record
+    <$> Lexer.curly (parseRecordMappings parseA)
 
-parseTupleType :: Parser Syntax.Type
-parseTupleType =
-  Syntax.TupleType
-    <$> Lexer.parens (Lexer.commaSeparated parseType)
+-- * Tuples
+
+parseTuple :: Parser a -> Parser (Syntax.Tuple a)
+parseTuple parseA =
+  Syntax.Tuple
+    <$> Lexer.parens (Lexer.commaSeparated parseA)
+
+-- * Types
+
+parseTypeReference :: Parser String
+parseTypeReference = Lexer.typeName
+
+parseRecordType :: Parser (Syntax.Record Syntax.Type)
+parseRecordType = parseRecord parseType
+
+parseTupleType :: Parser (Syntax.Tuple Syntax.Type)
+parseTupleType = parseTuple parseType
 
 parseType :: Parser Syntax.Type
 parseType =
-      parseTypeReference
-  <|> parseTupleType
-  <|> parseRecordType
+      Syntax.TypeReference
+        <$> parseTypeReference
+
+  <|> Syntax.TupleType
+        <$> parseTupleType
+
+  <|> Syntax.RecordType
+        <$> parseRecordType
