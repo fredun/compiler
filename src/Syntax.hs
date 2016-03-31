@@ -14,3 +14,7 @@ data Type =
   | TupleType (Tuple Type)
   | RecordType (Record Type)
   deriving (Eq, Ord, Show)
+
+data Binding =
+    TypeBinding String Type
+  deriving (Eq, Ord, Show)

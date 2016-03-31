@@ -22,6 +22,9 @@ typeName = lexeme $ do
   rest <- many alphaNumChar
   return (first : rest)
 
+keyword :: String -> Parser ()
+keyword kw = lexeme $ void $ string kw
+
 identifier :: Parser String
 identifier = lexeme $ do
   first <- lowerChar

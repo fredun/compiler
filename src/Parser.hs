@@ -56,3 +56,16 @@ parseType =
 
   <|> Syntax.RecordType
         <$> parseRecordType
+
+-- * Bindings
+
+parseTypeBinding :: Parser Syntax.Binding
+parseTypeBinding = do
+  _ <- Lexer.keyword "type"
+  i <- Lexer.identifier
+  _ <- Lexer.symbol "="
+  t <- parseType
+  return (Syntax.TypeBinding i t)
+
+parseBinding :: Parser Syntax.Binding
+parseBinding = parseTypeBinding

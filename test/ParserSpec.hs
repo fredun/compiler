@@ -61,3 +61,41 @@ spec = do
               ]
             )
           )
+
+  describe "parseBinding" $ do
+
+    it "parses type binding to tuple type" $ do
+      let res = parse
+                  Parser.parseBinding
+                  "foo.fn"
+                  "type bar = (Foo, Bar)"
+      res `shouldBe`
+        Right
+          ( Syntax.TypeBinding "bar"
+            ( Syntax.TupleType
+              ( Syntax.Tuple
+                [ Syntax.TypeReference "Foo"
+                , Syntax.TypeReference "Bar"
+                ]
+              )
+            )
+          )
+
+    it "parses type binding to record type" $ do
+      let res = parse
+                  Parser.parseBinding
+                  "foo.fn"
+                  "type bar = {x: Foo, y: Bar}"
+      res `shouldBe`
+        Right
+          ( Syntax.TypeBinding "bar"
+            ( Syntax.RecordType
+              ( Syntax.Record
+                ( Map.fromList
+                  [ ("x", Syntax.TypeReference "Foo")
+                  , ("y", Syntax.TypeReference "Bar")
+                  ]
+                )
+              )
+            )
+          )
