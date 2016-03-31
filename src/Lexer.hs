@@ -31,6 +31,9 @@ identifier = lexeme $ do
 curly :: Parser a -> Parser a
 curly = between (symbol "{") (symbol "}")
 
+parens :: Parser a -> Parser a
+parens = between (symbol "(") (symbol ")")
+
 colon :: Parser ()
 colon = void (symbol ":")
 

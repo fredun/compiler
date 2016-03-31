@@ -5,5 +5,6 @@ import Data.Text (Text)
 
 data Type =
     TypeReference String
-  | StructuralType (Map String Type)
+  | TupleType [Type]
+  | RecordType (Map String Type)
   deriving (Eq, Ord, Show)

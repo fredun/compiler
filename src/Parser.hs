@@ -28,12 +28,18 @@ parseTypeMappings =
   Map.fromList
     <$> Lexer.commaSeparated parseTypeMapping
 
-parseStructuralType :: Parser Syntax.Type
-parseStructuralType =
-  Syntax.StructuralType
+parseRecordType :: Parser Syntax.Type
+parseRecordType =
+  Syntax.RecordType
     <$> Lexer.curly parseTypeMappings
+
+parseTupleType :: Parser Syntax.Type
+parseTupleType =
+  Syntax.TupleType
+    <$> Lexer.parens (Lexer.commaSeparated parseType)
 
 parseType :: Parser Syntax.Type
 parseType =
       parseTypeReference
-  <|> parseStructuralType
+  <|> parseTupleType
+  <|> parseRecordType
