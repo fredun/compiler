@@ -5,7 +5,7 @@ import Data.Text (Text)
 
 data Constant =
     PrimitiveConstant
-  | FunctionConstant Constant Constant
+  | FunctionConstant
   | ForAllConstant Kind
   | RecordConstant (Set Text)
 
