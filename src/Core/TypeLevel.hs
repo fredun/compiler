@@ -7,6 +7,7 @@ data Constant =
     PrimitiveConstant
   | FunctionConstant
   | ForAllConstant Kind
+  | ExistsConstant Kind
   | RecordConstant (Set Text)
 
 data Kind =
