@@ -8,8 +8,8 @@ import Text.Megaparsec
 
 import Test.Hspec
 
-import qualified Parser
-import qualified Syntax
+import qualified Frontend.Parser as Parser
+import qualified Frontend.Syntax as Syntax
 
 spec :: Spec
 spec = do

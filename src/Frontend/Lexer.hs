@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lexer where
+module Frontend.Lexer where
 
 import Control.Monad (void)
 

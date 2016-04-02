@@ -1,4 +1,4 @@
-module Syntax where
+module Frontend.Syntax where
 
 import Data.Map (Map)
 import Data.Text (Text)

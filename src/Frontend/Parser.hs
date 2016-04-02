@@ -1,4 +1,4 @@
-module Parser where
+module Frontend.Parser where
 
 import Data.Map (Map)
 import qualified Data.Map as Map
@@ -6,8 +6,8 @@ import qualified Data.Map as Map
 import Text.Megaparsec
 import Text.Megaparsec.Text
 
-import qualified Syntax
-import qualified Lexer
+import qualified Frontend.Syntax as Syntax
+import qualified Frontend.Lexer as Lexer
 
 -- * Records
 
