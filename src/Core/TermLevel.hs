@@ -27,3 +27,13 @@ freeVars (TypeAbstraction _ _ t) = freeVars t
 freeVars (TypeApplication t _) = freeVars t
 freeVars (RecordIntroduction m) = Set.unions (map freeVars (Map.elems m))
 freeVars (RecordElimination t v) = Set.insert v (freeVars t)
+
+freeTypeVars :: Term -> Set Text
+freeTypeVars Constant = Set.empty
+freeTypeVars (Variable _) = Set.empty
+freeTypeVars (Abstraction _ y t) = Set.union (TypeLevel.freeVars y) (freeTypeVars t)
+freeTypeVars (Application l r) = Set.union (freeTypeVars l) (freeTypeVars r)
+freeTypeVars (TypeAbstraction v _ t) = Set.delete v (freeTypeVars t)
+freeTypeVars (TypeApplication t y) = Set.union (freeTypeVars t) (TypeLevel.freeVars y)
+freeTypeVars (RecordIntroduction m) = Set.unions (map freeTypeVars (Map.elems m))
+freeTypeVars (RecordElimination t _) = freeTypeVars t
