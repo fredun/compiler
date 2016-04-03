@@ -13,9 +13,9 @@ import qualified Core.TypeLevel as TypeLevel
 data TermF t =
     Constant
   | Variable Text
-  | Abstraction Text TypeLevel.Type t
+  | Abstraction Text t
   | Application t t
-  | TypeAbstraction Text TypeLevel.Kind t
+  | TypeAbstraction Text t
   | TypeApplication t TypeLevel.Type
   | RecordIntroduction (Map Text t)
   | RecordElimination t Text
@@ -26,9 +26,9 @@ type Term = Fix TermF
 freeVarsF :: TermF (Set Text) -> Set Text
 freeVarsF Constant = Set.empty
 freeVarsF (Variable v) = Set.singleton v
-freeVarsF (Abstraction v _ t) = Set.delete v t
+freeVarsF (Abstraction v t) = Set.delete v t
 freeVarsF (Application l r) = Set.union l r
-freeVarsF (TypeAbstraction _ _ t) = t
+freeVarsF (TypeAbstraction _ t) = t
 freeVarsF (TypeApplication t _) = t
 freeVarsF (RecordIntroduction m) = Set.unions (Map.elems m)
 freeVarsF (RecordElimination t v) = Set.insert v t
@@ -39,9 +39,9 @@ freeVars = Fix.cata freeVarsF
 freeTypeVarsF :: TermF (Set Text) -> Set Text
 freeTypeVarsF Constant = Set.empty
 freeTypeVarsF (Variable _) = Set.empty
-freeTypeVarsF (Abstraction _ y t) = Set.union (TypeLevel.freeVars y) t
+freeTypeVarsF (Abstraction _ t) = t
 freeTypeVarsF (Application l r) = Set.union l r
-freeTypeVarsF (TypeAbstraction v _ t) = Set.delete v t
+freeTypeVarsF (TypeAbstraction v t) = Set.delete v t
 freeTypeVarsF (TypeApplication t y) = Set.union t (TypeLevel.freeVars y)
 freeTypeVarsF (RecordIntroduction m) = Set.unions (Map.elems m)
 freeTypeVarsF (RecordElimination t _) = t

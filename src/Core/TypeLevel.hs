@@ -20,7 +20,7 @@ data Kind =
 data TypeF t =
     Constant Constant
   | Variable Text
-  | Abstraction Text Kind t
+  | Abstraction Text t
   | Application t t
   deriving (Functor)
 
@@ -40,7 +40,7 @@ kindOfConstant (RecordConstant _) = KindOfTypes
 freeVarsF :: TypeF (Set Text) -> Set Text
 freeVarsF (Constant _) = Set.empty
 freeVarsF (Variable v) = Set.singleton v
-freeVarsF (Abstraction v _ t) = Set.delete v t
+freeVarsF (Abstraction v t) = Set.delete v t
 freeVarsF (Application l r) = Set.union l r
 
 freeVars :: Type -> Set Text
