@@ -1,5 +1,7 @@
 module Core.TypeLevel where
 
+import Data.Fix (Fix)
+import qualified Data.Fix as Fix
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (Text)
@@ -15,11 +17,14 @@ data Kind =
     KindOfTypes
   | KindOfTypeConstructors Kind Kind
 
-data Type =
+data TypeF t =
     Constant Constant
   | Variable Text
-  | Abstraction Text Kind Type
-  | Application Type Type
+  | Abstraction Text Kind t
+  | Application t t
+  deriving (Functor)
+
+type Type = Fix TypeF
 
 data Binding =
     TypeVariableBinding Text Kind
@@ -32,8 +37,11 @@ kindOfConstant (ForAllConstant k) = KindOfTypeConstructors (KindOfTypeConstructo
 kindOfConstant (ExistsConstant k) = KindOfTypeConstructors (KindOfTypeConstructors k KindOfTypes) KindOfTypes
 kindOfConstant (RecordConstant _) = KindOfTypes
 
+freeVarsF :: TypeF (Set Text) -> Set Text
+freeVarsF (Constant _) = Set.empty
+freeVarsF (Variable v) = Set.singleton v
+freeVarsF (Abstraction v _ t) = Set.delete v t
+freeVarsF (Application l r) = Set.union l r
+
 freeVars :: Type -> Set Text
-freeVars (Constant _) = Set.empty
-freeVars (Variable v) = Set.singleton v
-freeVars (Abstraction v _ t) = Set.delete v (freeVars t)
-freeVars (Application l r) = Set.union (freeVars l) (freeVars r)
+freeVars = Fix.cata freeVarsF
