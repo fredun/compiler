@@ -31,17 +31,37 @@ data Binding =
   | TermVariableBinding Text Type
 
 kindOfConstant :: Constant -> Kind
-kindOfConstant PrimitiveConstant = KindOfTypes
-kindOfConstant FunctionConstant = KindOfTypeConstructors KindOfTypes (KindOfTypeConstructors KindOfTypes KindOfTypes)
-kindOfConstant (ForAllConstant k) = KindOfTypeConstructors (KindOfTypeConstructors k KindOfTypes) KindOfTypes
-kindOfConstant (ExistsConstant k) = KindOfTypeConstructors (KindOfTypeConstructors k KindOfTypes) KindOfTypes
-kindOfConstant (RecordConstant _) = KindOfTypes
+kindOfConstant constant = case constant of
+
+  PrimitiveConstant ->
+    KindOfTypes
+
+  FunctionConstant ->
+    KindOfTypeConstructors KindOfTypes (KindOfTypeConstructors KindOfTypes KindOfTypes)
+
+  ForAllConstant kind ->
+    KindOfTypeConstructors (KindOfTypeConstructors kind KindOfTypes) KindOfTypes
+
+  ExistsConstant kind ->
+    KindOfTypeConstructors (KindOfTypeConstructors kind KindOfTypes) KindOfTypes
+
+  RecordConstant _ ->
+    KindOfTypes
 
 freeVarsF :: TypeF (Set Text) -> Set Text
-freeVarsF (Constant _) = Set.empty
-freeVarsF (Variable v) = Set.singleton v
-freeVarsF (Abstraction v t) = Set.delete v t
-freeVarsF (Application l r) = Set.union l r
+freeVarsF typ = case typ of
+
+  Constant _ ->
+    Set.empty
+
+  Variable var ->
+    Set.singleton var
+
+  Abstraction var vars ->
+    Set.delete var vars
+
+  Application leftVars rightVars ->
+    Set.union leftVars rightVars
 
 freeVars :: Type -> Set Text
 freeVars = Fix.cata freeVarsF

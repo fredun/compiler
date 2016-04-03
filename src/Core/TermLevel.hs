@@ -24,27 +24,61 @@ data TermF t =
 type Term = Fix TermF
 
 freeVarsF :: TermF (Set Text) -> Set Text
-freeVarsF Constant = Set.empty
-freeVarsF (Variable v) = Set.singleton v
-freeVarsF (Abstraction v t) = Set.delete v t
-freeVarsF (Application l r) = Set.union l r
-freeVarsF (TypeAbstraction _ t) = t
-freeVarsF (TypeApplication t _) = t
-freeVarsF (RecordIntroduction m) = Set.unions (Map.elems m)
-freeVarsF (RecordElimination t v) = Set.insert v t
+freeVarsF term = case term of
+
+  Constant ->
+    Set.empty
+
+  Variable var ->
+    Set.singleton var
+
+  Abstraction var vars ->
+    Set.delete var vars
+
+  Application leftVars rightVars ->
+    Set.union leftVars rightVars
+
+  TypeAbstraction _ vars ->
+    vars
+
+  TypeApplication vars _ ->
+    vars
+
+  RecordIntroduction mapping ->
+    Set.unions (Map.elems mapping)
+
+  RecordElimination vars var ->
+    Set.insert var vars
 
 freeVars :: Term -> Set Text
 freeVars = Fix.cata freeVarsF
 
 freeTypeVarsF :: TermF (Set Text) -> Set Text
-freeTypeVarsF Constant = Set.empty
-freeTypeVarsF (Variable _) = Set.empty
-freeTypeVarsF (Abstraction _ t) = t
-freeTypeVarsF (Application l r) = Set.union l r
-freeTypeVarsF (TypeAbstraction v t) = Set.delete v t
-freeTypeVarsF (TypeApplication t y) = Set.union t (TypeLevel.freeVars y)
-freeTypeVarsF (RecordIntroduction m) = Set.unions (Map.elems m)
-freeTypeVarsF (RecordElimination t _) = t
+freeTypeVarsF term = case term of
+
+  Constant ->
+    Set.empty
+
+  Variable _ ->
+    Set.empty
+
+  Abstraction _ typeVars ->
+    typeVars
+
+  Application leftVars rightVars ->
+    Set.union leftVars rightVars
+
+  TypeAbstraction typeVar typeVars ->
+    Set.delete typeVar typeVars
+
+  TypeApplication typeVars typ ->
+    Set.union typeVars (TypeLevel.freeVars typ)
+
+  RecordIntroduction mapping ->
+    Set.unions (Map.elems mapping)
+
+  RecordElimination typeVars _ ->
+    typeVars
 
 freeTypeVars :: Term -> Set Text
 freeTypeVars = Fix.cata freeVarsF
