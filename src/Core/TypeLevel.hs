@@ -1,6 +1,7 @@
 module Core.TypeLevel where
 
 import Data.Set (Set)
+import qualified Data.Set as Set
 import Data.Text (Text)
 
 data Constant =
@@ -30,3 +31,9 @@ kindOfConstant FunctionConstant = KindOfTypeConstructors KindOfTypes (KindOfType
 kindOfConstant (ForAllConstant k) = KindOfTypeConstructors (KindOfTypeConstructors k KindOfTypes) KindOfTypes
 kindOfConstant (ExistsConstant k) = KindOfTypeConstructors (KindOfTypeConstructors k KindOfTypes) KindOfTypes
 kindOfConstant (RecordConstant _) = KindOfTypes
+
+freeVars :: Type -> Set Text
+freeVars (Constant _) = Set.empty
+freeVars (Variable v) = Set.singleton v
+freeVars (Abstraction v _ t) = Set.delete v (freeVars t)
+freeVars (Application l r) = Set.union (freeVars l) (freeVars r)

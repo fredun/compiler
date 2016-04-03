@@ -1,17 +1,17 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Frontend.Lexer where
 
 import Control.Monad (void)
 
 import Text.Megaparsec
 import Text.Megaparsec.Text
-import Text.Megaparsec.ShowToken
 import qualified Text.Megaparsec.Lexer as L
 
 -- * Helpers
 
+lexeme :: Parser a -> Parser a
 lexeme = L.lexeme space
+
+symbol :: String -> Parser String
 symbol = L.symbol space
 
 -- * Individual Components

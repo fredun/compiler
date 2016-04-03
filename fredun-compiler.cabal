@@ -19,13 +19,17 @@ cabal-version:       >=1.10
 library
   exposed-modules:     Frontend.Lexer,
                        Frontend.Syntax,
-                       Frontend.Parser
+                       Frontend.Parser,
+                       Core.TermLevel,
+                       Core.TypeLevel
   build-depends:       base,
                        containers,
                        megaparsec,
                        text
   hs-source-dirs:      src
   default-language:    Haskell2010
+  extensions:          OverloadedStrings
+  ghc-options:         -Wall
 
 executable fredun-compiler
   main-is:             Main.hs
