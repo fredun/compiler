@@ -104,4 +104,4 @@ freeTypeVarsF term = case term of
     typeVars
 
 freeTypeVars :: Term -> Set Text
-freeTypeVars = Fix.cata freeVarsF
+freeTypeVars = Fix.cata freeTypeVarsF
