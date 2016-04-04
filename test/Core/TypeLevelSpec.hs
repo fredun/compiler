@@ -24,17 +24,22 @@ spec = do
       let res =
             TypeLevel.freeVars
               ( Fix
-                ( TypeLevel.Variable "foo" )
+                ( TypeLevel.Variable
+                  ( TypeLevel.Identifier "foo" )
+                )
               )
-      res `shouldBe` Set.fromList ["foo"]
+      res `shouldBe` Set.fromList [TypeLevel.Identifier "foo"]
 
     it "retrieves none when shadowed by an abstraction" $ do
       let res =
             TypeLevel.freeVars
               ( Fix
-                ( TypeLevel.Abstraction "foo"
+                ( TypeLevel.Abstraction
+                  ( TypeLevel.Identifier "foo" )
                   ( Fix
-                    ( TypeLevel.Variable "foo" )
+                    ( TypeLevel.Variable
+                      ( TypeLevel.Identifier "foo" )
+                    )
                   )
                 )
               )
@@ -44,13 +49,16 @@ spec = do
       let res =
             TypeLevel.freeVars
               ( Fix
-                ( TypeLevel.Abstraction "foo"
+                ( TypeLevel.Abstraction
+                  ( TypeLevel.Identifier "foo" )
                   ( Fix
-                    ( TypeLevel.Variable "bar" )
+                    ( TypeLevel.Variable
+                      ( TypeLevel.Identifier "bar" )
+                    )
                   )
                 )
               )
-      res `shouldBe` Set.fromList ["bar"]
+      res `shouldBe` Set.fromList [TypeLevel.Identifier "bar"]
 
     it "retrieves two from an application" $ do
       let res =
@@ -58,11 +66,15 @@ spec = do
               ( Fix
                 ( TypeLevel.Application
                   ( Fix
-                    ( TypeLevel.Variable "foo" )
+                    ( TypeLevel.Variable
+                      ( TypeLevel.Identifier "foo" )
+                    )
                   )
                   ( Fix
-                    ( TypeLevel.Variable "bar" )
+                    ( TypeLevel.Variable
+                      ( TypeLevel.Identifier "bar" )
+                    )
                   )
                 )
               )
-      res `shouldBe` Set.fromList ["foo", "bar"]
+      res `shouldBe` Set.fromList [TypeLevel.Identifier "foo", TypeLevel.Identifier "bar"]

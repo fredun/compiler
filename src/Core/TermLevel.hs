@@ -10,20 +10,23 @@ import Data.Text (Text)
 
 import qualified Core.TypeLevel as TypeLevel
 
+newtype Identifier = Identifier Text
+  deriving (Eq, Ord, Show)
+
 data TermF t =
     Constant
-  | Variable Text
-  | Abstraction Text t
+  | Variable Identifier
+  | Abstraction Identifier t
   | Application t t
-  | TypeAbstraction Text t
+  | TypeAbstraction TypeLevel.Identifier t
   | TypeApplication t TypeLevel.Type
-  | RecordIntroduction (Map Text t)
-  | RecordElimination t Text
+  | RecordIntroduction (Map Identifier t)
+  | RecordElimination t Identifier
   deriving (Functor)
 
 type Term = Fix TermF
 
-freeVarsF :: TermF (Set Text) -> Set Text
+freeVarsF :: TermF (Set Identifier) -> Set Identifier
 freeVarsF term = case term of
 
   -- A constant does not have any free variables.
@@ -61,10 +64,10 @@ freeVarsF term = case term of
   RecordElimination vars _ ->
     vars
 
-freeVars :: Term -> Set Text
+freeVars :: Term -> Set Identifier
 freeVars = Fix.cata freeVarsF
 
-freeTypeVarsF :: TermF (Set Text) -> Set Text
+freeTypeVarsF :: TermF (Set TypeLevel.Identifier) -> Set TypeLevel.Identifier
 freeTypeVarsF term = case term of
 
   -- A constant doesn't have any free type variables.
@@ -103,5 +106,5 @@ freeTypeVarsF term = case term of
   RecordElimination typeVars _ ->
     typeVars
 
-freeTypeVars :: Term -> Set Text
+freeTypeVars :: Term -> Set TypeLevel.Identifier
 freeTypeVars = Fix.cata freeTypeVarsF

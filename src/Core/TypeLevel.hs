@@ -6,12 +6,15 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (Text)
 
+newtype Identifier = Identifier Text
+  deriving (Eq, Ord, Show)
+
 data Constant =
     PrimitiveConstant
   | FunctionConstant
   | ForAllConstant Kind
   | ExistsConstant Kind
-  | RecordConstant (Set Text)
+  | RecordConstant (Set Identifier)
 
 data Kind =
     KindOfTypes
@@ -19,16 +22,12 @@ data Kind =
 
 data TypeF t =
     Constant Constant
-  | Variable Text
-  | Abstraction Text t
+  | Variable Identifier
+  | Abstraction Identifier t
   | Application t t
   deriving (Functor)
 
 type Type = Fix TypeF
-
-data Binding =
-    TypeVariableBinding Text Kind
-  | TermVariableBinding Text Type
 
 kindOfConstant :: Constant -> Kind
 kindOfConstant constant = case constant of
@@ -59,7 +58,7 @@ kindOfConstant constant = case constant of
   RecordConstant _ ->
     KindOfTypes
 
-freeVarsF :: TypeF (Set Text) -> Set Text
+freeVarsF :: TypeF (Set Identifier) -> Set Identifier
 freeVarsF typ = case typ of
 
   -- A constant doesn't have any free type variables.
@@ -80,5 +79,5 @@ freeVarsF typ = case typ of
   Application leftVars rightVars ->
     Set.union leftVars rightVars
 
-freeVars :: Type -> Set Text
+freeVars :: Type -> Set Identifier
 freeVars = Fix.cata freeVarsF

@@ -26,17 +26,22 @@ spec = do
       let res =
             TermLevel.freeVars
               ( Fix
-                ( TermLevel.Variable "foo" )
+                ( TermLevel.Variable
+                  ( TermLevel.Identifier "foo" )
+                )
               )
-      res `shouldBe` Set.fromList ["foo"]
+      res `shouldBe` Set.fromList [TermLevel.Identifier "foo"]
 
     it "retrieves none when shadowed by an abstraction" $ do
       let res =
             TermLevel.freeVars
               ( Fix
-                ( TermLevel.Abstraction "foo"
+                ( TermLevel.Abstraction
+                  ( TermLevel.Identifier "foo" )
                   ( Fix
-                    ( TermLevel.Variable "foo" )
+                    ( TermLevel.Variable
+                      ( TermLevel.Identifier "foo" )
+                    )
                   )
                 )
               )
@@ -46,13 +51,16 @@ spec = do
       let res =
             TermLevel.freeVars
               ( Fix
-                ( TermLevel.Abstraction "foo"
+                ( TermLevel.Abstraction
+                  ( TermLevel.Identifier "foo" )
                   ( Fix
-                    ( TermLevel.Variable "bar" )
+                    ( TermLevel.Variable
+                      ( TermLevel.Identifier "bar" )
+                    )
                   )
                 )
               )
-      res `shouldBe` Set.fromList ["bar"]
+      res `shouldBe` Set.fromList [TermLevel.Identifier "bar"]
 
     it "retrieves two from an application" $ do
       let res =
@@ -60,26 +68,33 @@ spec = do
               ( Fix
                 ( TermLevel.Application
                   ( Fix
-                    ( TermLevel.Variable "foo" )
+                    ( TermLevel.Variable
+                      ( TermLevel.Identifier "foo" )
+                    )
                   )
                   ( Fix
-                    ( TermLevel.Variable "bar" )
+                    ( TermLevel.Variable
+                      ( TermLevel.Identifier "bar" )
+                    )
                   )
                 )
               )
-      res `shouldBe` Set.fromList ["foo", "bar"]
+      res `shouldBe` Set.fromList [TermLevel.Identifier "foo", TermLevel.Identifier "bar"]
 
     it "retrieves one from a type abstraction" $ do
       let res =
             TermLevel.freeVars
               ( Fix
-                ( TermLevel.TypeAbstraction "foo"
+                ( TermLevel.TypeAbstraction
+                  ( TypeLevel.Identifier "foo" )
                   ( Fix
-                    ( TermLevel.Variable "bar" )
+                    ( TermLevel.Variable
+                      ( TermLevel.Identifier "bar" )
+                    )
                   )
                 )
               )
-      res `shouldBe` Set.fromList ["bar"]
+      res `shouldBe` Set.fromList [TermLevel.Identifier "bar"]
 
     it "retrieves one from a type application" $ do
       let res =
@@ -87,14 +102,18 @@ spec = do
               ( Fix
                 ( TermLevel.TypeApplication
                   ( Fix
-                    ( TermLevel.Variable "bar" )
+                    ( TermLevel.Variable
+                      ( TermLevel.Identifier "bar" )
+                    )
                   )
                   ( Fix
-                    ( TypeLevel.Variable "foo" )
+                    ( TypeLevel.Variable
+                      ( TypeLevel.Identifier "foo" )
+                    )
                   )
                 )
               )
-      res `shouldBe` Set.fromList ["bar"]
+      res `shouldBe` Set.fromList [TermLevel.Identifier "bar"]
 
     it "retrieves many from a record introduction" $ do
       let res =
@@ -102,13 +121,23 @@ spec = do
               ( Fix
                 ( TermLevel.RecordIntroduction
                   ( Map.fromList
-                    [ ( "1", Fix ( TermLevel.Variable "bar" ) )
-                    , ( "2", Fix ( TermLevel.Variable "foo" ) )
+                    [ ( TermLevel.Identifier "1"
+                      , Fix
+                        ( TermLevel.Variable
+                          ( TermLevel.Identifier "bar" )
+                        )
+                      )
+                    , ( TermLevel.Identifier "2"
+                      , Fix
+                        ( TermLevel.Variable
+                          ( TermLevel.Identifier "foo" )
+                        )
+                      )
                     ]
                   )
                 )
               )
-      res `shouldBe` Set.fromList ["foo", "bar"]
+      res `shouldBe` Set.fromList [TermLevel.Identifier "foo", TermLevel.Identifier "bar"]
 
     it "retrieves one from a record elimination" $ do
       let res =
@@ -116,9 +145,11 @@ spec = do
               ( Fix
                 ( TermLevel.RecordElimination
                   ( Fix
-                    ( TermLevel.Variable "bar" )
+                    ( TermLevel.Variable
+                      ( TermLevel.Identifier "bar" )
+                    )
                   )
-                  "foo"
+                  ( TermLevel.Identifier "foo" )
                 )
               )
-      res `shouldBe` Set.fromList ["bar"]
+      res `shouldBe` Set.fromList [TermLevel.Identifier "bar"]
