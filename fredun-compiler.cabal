@@ -24,7 +24,7 @@ library
                        Core.TypeLevel
   build-depends:       base,
                        containers,
-                       data-fix,
+                       fixplate,
                        megaparsec,
                        text
   hs-source-dirs:      src
@@ -46,7 +46,7 @@ Test-Suite test
   main-is:             Main.hs
   build-depends:       base,
                        containers,
-                       data-fix,
+                       fixplate,
                        fredun-compiler,
                        hspec,
                        megaparsec

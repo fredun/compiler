@@ -2,7 +2,8 @@ module Core.TypeLevelSpec where
 
 import Test.Hspec
 
-import Data.Fix (Fix(..))
+import Data.Generics.Fixplate (Mu(..))
+
 import qualified Data.Set as Set
 
 import qualified Core.TypeLevel as TypeLevel

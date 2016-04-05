@@ -1,7 +1,8 @@
 module Core.TermLevel where
 
-import Data.Fix (Fix)
-import qualified Data.Fix as Fix
+import Data.Generics.Fixplate (Mu(..))
+import qualified Data.Generics.Fixplate as Fix
+
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Map (Map)
@@ -24,7 +25,7 @@ data TermF t =
   | RecordElimination t Identifier
   deriving (Functor)
 
-type Term = Fix TermF
+type Term = Mu TermF
 
 freeVarsF :: TermF (Set Identifier) -> Set Identifier
 freeVarsF term = case term of

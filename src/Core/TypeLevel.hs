@@ -1,7 +1,8 @@
 module Core.TypeLevel where
 
-import Data.Fix (Fix)
-import qualified Data.Fix as Fix
+import Data.Generics.Fixplate (Mu(..))
+import qualified Data.Generics.Fixplate as Fix
+
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (Text)
@@ -27,7 +28,7 @@ data TypeF t =
   | Application t t
   deriving (Functor)
 
-type Type = Fix TypeF
+type Type = Mu TypeF
 
 kindOfConstant :: Constant -> Kind
 kindOfConstant constant = case constant of
