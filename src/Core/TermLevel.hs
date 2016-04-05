@@ -23,7 +23,11 @@ data TermF t =
   | TypeApplication t TypeLevel.Type
   | RecordIntroduction (Map Identifier t)
   | RecordElimination t Identifier
-  deriving (Functor)
+  deriving (Eq, Ord, Show, Functor)
+
+instance Fix.EqF TermF where equalF = (==)
+instance Fix.OrdF TermF where compareF = compare
+instance Fix.ShowF TermF where showsPrecF = showsPrec
 
 type Term = Mu TermF
 

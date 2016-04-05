@@ -16,17 +16,23 @@ data Constant =
   | ForAllConstant Kind
   | ExistsConstant Kind
   | RecordConstant (Set Identifier)
+  deriving (Eq, Ord, Show)
 
 data Kind =
     KindOfTypes
   | KindOfTypeConstructors Kind Kind
+  deriving (Eq, Ord, Show)
 
 data TypeF t =
     Constant Constant
   | Variable Identifier
   | Abstraction Identifier t
   | Application t t
-  deriving (Functor)
+  deriving (Eq, Ord, Show, Functor)
+
+instance Fix.EqF TypeF where equalF = (==)
+instance Fix.OrdF TypeF where compareF = compare
+instance Fix.ShowF TypeF where showsPrecF = showsPrec
 
 type Type = Mu TypeF
 
