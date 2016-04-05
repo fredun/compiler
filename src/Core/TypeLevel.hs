@@ -1,14 +1,19 @@
 module Core.TypeLevel where
 
+import GHC.Generics
+
 import Data.Generics.Fixplate (Mu(..))
 import qualified Data.Generics.Fixplate as Fix
 
+import qualified Data.Aeson as Aeson
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (Text)
 
 newtype Identifier = Identifier Text
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord, Show, Generic)
+
+instance Aeson.ToJSON Identifier
 
 data Constant =
     PrimitiveConstant
@@ -16,25 +21,35 @@ data Constant =
   | ForAllConstant Kind
   | ExistsConstant Kind
   | RecordConstant (Set Identifier)
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord, Show, Generic)
+
+instance Aeson.ToJSON Constant
 
 data Kind =
     KindOfTypes
   | KindOfTypeConstructors Kind Kind
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord, Show, Generic)
+
+instance Aeson.ToJSON Kind
 
 data TypeF t =
     Constant Constant
   | Variable Identifier
   | Abstraction Identifier t
   | Application t t
-  deriving (Eq, Ord, Show, Functor)
+  deriving (Eq, Ord, Show, Functor, Generic)
+
+instance Aeson.ToJSON t => Aeson.ToJSON (TypeF t)
+
+newtype Type = Type (Mu TypeF)
+  deriving (Eq, Ord, Show)
+
+instance Aeson.ToJSON Type where
+  toJSON (Type fix) = Fix.cata Aeson.toJSON fix
 
 instance Fix.EqF TypeF where equalF = (==)
 instance Fix.OrdF TypeF where compareF = compare
 instance Fix.ShowF TypeF where showsPrecF = showsPrec
-
-type Type = Mu TypeF
 
 kindOfConstant :: Constant -> Kind
 kindOfConstant constant = case constant of
@@ -87,4 +102,4 @@ freeVarsF typ = case typ of
     Set.union leftVars rightVars
 
 freeVars :: Type -> Set Identifier
-freeVars = Fix.cata freeVarsF
+freeVars (Type mu) = Fix.cata freeVarsF mu

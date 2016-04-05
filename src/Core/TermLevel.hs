@@ -1,8 +1,11 @@
 module Core.TermLevel where
 
+import GHC.Generics
+
 import Data.Generics.Fixplate (Mu(..))
 import qualified Data.Generics.Fixplate as Fix
 
+import qualified Data.Aeson as Aeson
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Map (Map)
@@ -12,7 +15,9 @@ import Data.Text (Text)
 import qualified Core.TypeLevel as TypeLevel
 
 newtype Identifier = Identifier Text
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord, Show, Generic)
+
+instance Aeson.ToJSON Identifier
 
 data TermF t =
     Constant
@@ -21,15 +26,20 @@ data TermF t =
   | Application t t
   | TypeAbstraction TypeLevel.Identifier t
   | TypeApplication t TypeLevel.Type
-  | RecordIntroduction (Map Identifier t)
+  | RecordIntroduction (Map Text t)
   | RecordElimination t Identifier
-  deriving (Eq, Ord, Show, Functor)
+  deriving (Eq, Ord, Show, Functor, Generic)
+
+instance Aeson.ToJSON t => Aeson.ToJSON (TermF t)
+
+newtype Term = Term (Mu TermF)
+
+instance Aeson.ToJSON Term where
+  toJSON (Term fix) = Fix.cata Aeson.toJSON fix
 
 instance Fix.EqF TermF where equalF = (==)
 instance Fix.OrdF TermF where compareF = compare
 instance Fix.ShowF TermF where showsPrecF = showsPrec
-
-type Term = Mu TermF
 
 freeVarsF :: TermF (Set Identifier) -> Set Identifier
 freeVarsF term = case term of
@@ -70,7 +80,7 @@ freeVarsF term = case term of
     vars
 
 freeVars :: Term -> Set Identifier
-freeVars = Fix.cata freeVarsF
+freeVars (Term mu) = Fix.cata freeVarsF mu
 
 freeTypeVarsF :: TermF (Set TypeLevel.Identifier) -> Set TypeLevel.Identifier
 freeTypeVarsF term = case term of
@@ -112,4 +122,4 @@ freeTypeVarsF term = case term of
     typeVars
 
 freeTypeVars :: Term -> Set TypeLevel.Identifier
-freeTypeVars = Fix.cata freeTypeVarsF
+freeTypeVars (Term mu) = Fix.cata freeTypeVarsF mu

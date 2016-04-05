@@ -16,17 +16,21 @@ spec = do
     it "retrieves none from a type constant" $ do
       let res =
             TypeLevel.freeVars
-              ( Fix
-                ( TypeLevel.Constant TypeLevel.PrimitiveConstant )
+              ( TypeLevel.Type
+                ( Fix
+                  ( TypeLevel.Constant TypeLevel.PrimitiveConstant )
+                )
               )
       res `shouldBe` Set.fromList []
 
     it "retrieves one from a type variable" $ do
       let res =
             TypeLevel.freeVars
-              ( Fix
-                ( TypeLevel.Variable
-                  ( TypeLevel.Identifier "foo" )
+              ( TypeLevel.Type
+                ( Fix
+                  ( TypeLevel.Variable
+                    ( TypeLevel.Identifier "foo" )
+                  )
                 )
               )
       res `shouldBe` Set.fromList [TypeLevel.Identifier "foo"]
@@ -34,12 +38,14 @@ spec = do
     it "retrieves none when shadowed by an abstraction" $ do
       let res =
             TypeLevel.freeVars
-              ( Fix
-                ( TypeLevel.Abstraction
-                  ( TypeLevel.Identifier "foo" )
-                  ( Fix
-                    ( TypeLevel.Variable
-                      ( TypeLevel.Identifier "foo" )
+              ( TypeLevel.Type
+                ( Fix
+                  ( TypeLevel.Abstraction
+                    ( TypeLevel.Identifier "foo" )
+                    ( Fix
+                      ( TypeLevel.Variable
+                        ( TypeLevel.Identifier "foo" )
+                      )
                     )
                   )
                 )
@@ -49,12 +55,14 @@ spec = do
     it "retrieves one when not shadowed by an abstraction" $ do
       let res =
             TypeLevel.freeVars
-              ( Fix
-                ( TypeLevel.Abstraction
-                  ( TypeLevel.Identifier "foo" )
-                  ( Fix
-                    ( TypeLevel.Variable
-                      ( TypeLevel.Identifier "bar" )
+              ( TypeLevel.Type
+                ( Fix
+                  ( TypeLevel.Abstraction
+                    ( TypeLevel.Identifier "foo" )
+                    ( Fix
+                      ( TypeLevel.Variable
+                        ( TypeLevel.Identifier "bar" )
+                      )
                     )
                   )
                 )
@@ -64,16 +72,18 @@ spec = do
     it "retrieves two from an application" $ do
       let res =
             TypeLevel.freeVars
-              ( Fix
-                ( TypeLevel.Application
-                  ( Fix
-                    ( TypeLevel.Variable
-                      ( TypeLevel.Identifier "foo" )
+              ( TypeLevel.Type
+                ( Fix
+                  ( TypeLevel.Application
+                    ( Fix
+                      ( TypeLevel.Variable
+                        ( TypeLevel.Identifier "foo" )
+                      )
                     )
-                  )
-                  ( Fix
-                    ( TypeLevel.Variable
-                      ( TypeLevel.Identifier "bar" )
+                    ( Fix
+                      ( TypeLevel.Variable
+                        ( TypeLevel.Identifier "bar" )
+                      )
                     )
                   )
                 )
