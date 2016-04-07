@@ -1,19 +1,18 @@
-module Core.TypeLevel where
+{-# LANGUAGE DeriveDataTypeable #-}
 
-import GHC.Generics
+module Core.TypeLevel where
 
 import Data.Generics.Fixplate (Mu(..))
 import qualified Data.Generics.Fixplate as Fix
 
-import qualified Data.Aeson as Aeson
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Text (Text)
 
-newtype Identifier = Identifier Text
-  deriving (Eq, Ord, Show, Generic)
+import Data.Typeable
+import Data.Data
 
-instance Aeson.ToJSON Identifier
+newtype Identifier = Identifier String
+  deriving (Eq, Ord, Show, Typeable, Data)
 
 data Constant =
     PrimitiveConstant
@@ -21,31 +20,25 @@ data Constant =
   | ForAllConstant Kind
   | ExistsConstant Kind
   | RecordConstant (Set Identifier)
-  deriving (Eq, Ord, Show, Generic)
-
-instance Aeson.ToJSON Constant
+  deriving (Eq, Ord, Show, Typeable, Data)
 
 data Kind =
     KindOfTypes
   | KindOfTypeConstructors Kind Kind
-  deriving (Eq, Ord, Show, Generic)
-
-instance Aeson.ToJSON Kind
+  deriving (Eq, Ord, Show, Typeable, Data)
 
 data TypeF t =
     Constant Constant
   | Variable Identifier
   | Abstraction Identifier t
   | Application t t
-  deriving (Eq, Ord, Show, Functor, Generic)
+  deriving (Eq, Ord, Show, Functor, Typeable, Data)
 
-instance Aeson.ToJSON t => Aeson.ToJSON (TypeF t)
+newtype Type = Type (TypeF Type)
+  deriving (Eq, Ord, Show, Typeable, Data)
 
-newtype Type = Type (Mu TypeF)
-  deriving (Eq, Ord, Show)
-
-instance Aeson.ToJSON Type where
-  toJSON (Type fix) = Fix.cata Aeson.toJSON fix
+toMu :: Type -> Mu TypeF
+toMu (Type tf) = Fix (fmap toMu tf)
 
 instance Fix.EqF TypeF where equalF = (==)
 instance Fix.OrdF TypeF where compareF = compare
@@ -102,4 +95,4 @@ freeVarsF typ = case typ of
     Set.union leftVars rightVars
 
 freeVars :: Type -> Set Identifier
-freeVars (Type mu) = Fix.cata freeVarsF mu
+freeVars t = Fix.cata freeVarsF (toMu t)

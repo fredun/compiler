@@ -21,19 +21,22 @@ library
                        Frontend.Syntax,
                        Frontend.Parser,
                        Core.TermLevel,
-                       Core.TypeLevel
+                       Core.TypeLevel,
+                       Core.DSL
   build-depends:       aeson,
                        base,
                        containers,
                        fixplate,
                        megaparsec,
                        mtl,
-                       text
+                       scientific,
+                       text,
+                       template-haskell,
+                       trifecta
   hs-source-dirs:      src
   default-language:    Haskell2010
   default-extensions:  OverloadedStrings,
-                       DeriveFunctor,
-                       DeriveGeneric
+                       DeriveFunctor
   ghc-options:         -Wall
 
 executable fredun-compiler
@@ -55,4 +58,5 @@ Test-Suite test
                        megaparsec
   hs-source-dirs:      test
   default-language:    Haskell2010
-  default-extensions:  OverloadedStrings
+  default-extensions:  OverloadedStrings,
+                       QuasiQuotes

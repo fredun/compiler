@@ -1,8 +1,8 @@
+{-# LANGUAGE QuasiQuotes #-}
+
 module Core.TermLevelSpec where
 
 import Test.Hspec
-
-import Data.Generics.Fixplate (Mu(..))
 
 import qualified Data.Set as Set
 import qualified Data.Map as Map
@@ -10,99 +10,52 @@ import qualified Data.Map as Map
 import qualified Core.TypeLevel as TypeLevel
 import qualified Core.TermLevel as TermLevel
 
+import Core.DSL
+
 spec :: Spec
 spec = do
 
   describe "freeVars" $ do
 
     it "retrieves none from a constant" $ do
-      let res =
-            TermLevel.freeVars
-              ( TermLevel.Term
-                ( Fix
-                  ( TermLevel.Constant )
-                )
-              )
+      let res = TermLevel.freeVars [dsl|
+        (constant (numeric 42))
+      |]
       res `shouldBe` Set.fromList []
 
     it "retrieves one from a variable" $ do
-      let res =
-            TermLevel.freeVars
-              ( TermLevel.Term
-                ( Fix
-                  ( TermLevel.Variable
-                    ( TermLevel.Identifier "foo" )
-                  )
-                )
-              )
+      let res = TermLevel.freeVars [dsl|
+        (variable "foo")
+      |]
       res `shouldBe` Set.fromList [TermLevel.Identifier "foo"]
 
     it "retrieves none when shadowed by an abstraction" $ do
-      let res =
-            TermLevel.freeVars
-              ( TermLevel.Term
-                ( Fix
-                  ( TermLevel.Abstraction
-                    ( TermLevel.Identifier "foo" )
-                    ( Fix
-                      ( TermLevel.Variable
-                        ( TermLevel.Identifier "foo" )
-                      )
-                    )
-                  )
-                )
-              )
+      let res = TermLevel.freeVars [dsl|
+        (abstraction "foo" (variable "foo"))
+      |]
       res `shouldBe` Set.fromList []
 
     it "retrieves one when not shadowed by an abstraction" $ do
-      let res =
-            TermLevel.freeVars
-              ( TermLevel.Term
-                ( Fix
-                  ( TermLevel.Abstraction
-                    ( TermLevel.Identifier "foo" )
-                    ( Fix
-                      ( TermLevel.Variable
-                        ( TermLevel.Identifier "bar" )
-                      )
-                    )
-                  )
-                )
-              )
+      let res = TermLevel.freeVars [dsl|
+        (abstraction "foo" (variable "bar"))
+      |]
       res `shouldBe` Set.fromList [TermLevel.Identifier "bar"]
 
     it "retrieves two from an application" $ do
-      let res =
-            TermLevel.freeVars
-              ( TermLevel.Term
-                ( Fix
-                  ( TermLevel.Application
-                    ( Fix
-                      ( TermLevel.Variable
-                        ( TermLevel.Identifier "foo" )
-                      )
-                    )
-                    ( Fix
-                      ( TermLevel.Variable
-                        ( TermLevel.Identifier "bar" )
-                      )
-                    )
-                  )
-                )
-              )
+      let res = TermLevel.freeVars [dsl|
+        (application (variable "foo") (variable "bar"))
+      |]
       res `shouldBe` Set.fromList [TermLevel.Identifier "foo", TermLevel.Identifier "bar"]
 
     it "retrieves one from a type abstraction" $ do
       let res =
             TermLevel.freeVars
               ( TermLevel.Term
-                ( Fix
-                  ( TermLevel.TypeAbstraction
-                    ( TypeLevel.Identifier "foo" )
-                    ( Fix
-                      ( TermLevel.Variable
-                        ( TermLevel.Identifier "bar" )
-                      )
+                ( TermLevel.TypeAbstraction
+                  ( TypeLevel.Identifier "foo" )
+                  ( TermLevel.Term
+                    ( TermLevel.Variable
+                      ( TermLevel.Identifier "bar" )
                     )
                   )
                 )
@@ -113,19 +66,15 @@ spec = do
       let res =
             TermLevel.freeVars
               ( TermLevel.Term
-                ( Fix
-                  ( TermLevel.TypeApplication
-                    ( Fix
-                      ( TermLevel.Variable
-                        ( TermLevel.Identifier "bar" )
-                      )
+                ( TermLevel.TypeApplication
+                  ( TermLevel.Term
+                    ( TermLevel.Variable
+                      ( TermLevel.Identifier "bar" )
                     )
-                    ( TypeLevel.Type
-                      ( Fix
-                        ( TypeLevel.Variable
-                          ( TypeLevel.Identifier "foo" )
-                        )
-                      )
+                  )
+                  ( TypeLevel.Type
+                    ( TypeLevel.Variable
+                      ( TypeLevel.Identifier "foo" )
                     )
                   )
                 )
@@ -136,23 +85,21 @@ spec = do
       let res =
             TermLevel.freeVars
               ( TermLevel.Term
-                ( Fix
-                  ( TermLevel.RecordIntroduction
-                    ( Map.fromList
-                      [ ( "1"
-                        , Fix
-                          ( TermLevel.Variable
-                            ( TermLevel.Identifier "bar" )
-                          )
+                ( TermLevel.RecordIntroduction
+                  ( Map.fromList
+                    [ ( "1"
+                      , TermLevel.Term
+                        ( TermLevel.Variable
+                          ( TermLevel.Identifier "bar" )
                         )
-                      , ( "2"
-                        , Fix
-                          ( TermLevel.Variable
-                            ( TermLevel.Identifier "foo" )
-                          )
+                      )
+                    , ( "2"
+                      , TermLevel.Term
+                        ( TermLevel.Variable
+                          ( TermLevel.Identifier "foo" )
                         )
-                      ]
-                    )
+                      )
+                    ]
                   )
                 )
               )
@@ -162,15 +109,13 @@ spec = do
       let res =
             TermLevel.freeVars
               ( TermLevel.Term
-                ( Fix
-                  ( TermLevel.RecordElimination
-                    ( Fix
-                      ( TermLevel.Variable
-                        ( TermLevel.Identifier "bar" )
-                      )
+                ( TermLevel.RecordElimination
+                  ( TermLevel.Term
+                    ( TermLevel.Variable
+                      ( TermLevel.Identifier "bar" )
                     )
-                    ( TermLevel.Identifier "foo" )
                   )
+                  ( TermLevel.Identifier "foo" )
                 )
               )
       res `shouldBe` Set.fromList [TermLevel.Identifier "bar"]

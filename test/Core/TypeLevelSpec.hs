@@ -2,8 +2,6 @@ module Core.TypeLevelSpec where
 
 import Test.Hspec
 
-import Data.Generics.Fixplate (Mu(..))
-
 import qualified Data.Set as Set
 
 import qualified Core.TypeLevel as TypeLevel
@@ -17,9 +15,7 @@ spec = do
       let res =
             TypeLevel.freeVars
               ( TypeLevel.Type
-                ( Fix
-                  ( TypeLevel.Constant TypeLevel.PrimitiveConstant )
-                )
+                ( TypeLevel.Constant TypeLevel.PrimitiveConstant )
               )
       res `shouldBe` Set.fromList []
 
@@ -27,10 +23,8 @@ spec = do
       let res =
             TypeLevel.freeVars
               ( TypeLevel.Type
-                ( Fix
-                  ( TypeLevel.Variable
-                    ( TypeLevel.Identifier "foo" )
-                  )
+                ( TypeLevel.Variable
+                  ( TypeLevel.Identifier "foo" )
                 )
               )
       res `shouldBe` Set.fromList [TypeLevel.Identifier "foo"]
@@ -39,13 +33,11 @@ spec = do
       let res =
             TypeLevel.freeVars
               ( TypeLevel.Type
-                ( Fix
-                  ( TypeLevel.Abstraction
-                    ( TypeLevel.Identifier "foo" )
-                    ( Fix
-                      ( TypeLevel.Variable
-                        ( TypeLevel.Identifier "foo" )
-                      )
+                ( TypeLevel.Abstraction
+                  ( TypeLevel.Identifier "foo" )
+                  ( TypeLevel.Type
+                    ( TypeLevel.Variable
+                      ( TypeLevel.Identifier "foo" )
                     )
                   )
                 )
@@ -56,13 +48,11 @@ spec = do
       let res =
             TypeLevel.freeVars
               ( TypeLevel.Type
-                ( Fix
-                  ( TypeLevel.Abstraction
-                    ( TypeLevel.Identifier "foo" )
-                    ( Fix
-                      ( TypeLevel.Variable
-                        ( TypeLevel.Identifier "bar" )
-                      )
+                ( TypeLevel.Abstraction
+                  ( TypeLevel.Identifier "foo" )
+                  ( TypeLevel.Type
+                    ( TypeLevel.Variable
+                      ( TypeLevel.Identifier "bar" )
                     )
                   )
                 )
@@ -73,17 +63,15 @@ spec = do
       let res =
             TypeLevel.freeVars
               ( TypeLevel.Type
-                ( Fix
-                  ( TypeLevel.Application
-                    ( Fix
-                      ( TypeLevel.Variable
-                        ( TypeLevel.Identifier "foo" )
-                      )
+                ( TypeLevel.Application
+                  ( TypeLevel.Type
+                    ( TypeLevel.Variable
+                      ( TypeLevel.Identifier "foo" )
                     )
-                    ( Fix
-                      ( TypeLevel.Variable
-                        ( TypeLevel.Identifier "bar" )
-                      )
+                  )
+                  ( TypeLevel.Type
+                    ( TypeLevel.Variable
+                      ( TypeLevel.Identifier "bar" )
                     )
                   )
                 )

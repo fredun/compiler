@@ -1,41 +1,47 @@
-module Core.TermLevel where
+{-# LANGUAGE DeriveDataTypeable #-}
 
-import GHC.Generics
+module Core.TermLevel where
 
 import Data.Generics.Fixplate (Mu(..))
 import qualified Data.Generics.Fixplate as Fix
 
-import qualified Data.Aeson as Aeson
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Map (Map)
+import Data.Scientific (Scientific)
 import qualified Data.Map as Map
-import Data.Text (Text)
+
+import Data.Typeable
+import Data.Data
 
 import qualified Core.TypeLevel as TypeLevel
 
-newtype Identifier = Identifier Text
-  deriving (Eq, Ord, Show, Generic)
+newtype Identifier = Identifier String
+  deriving (Eq, Ord, Show, Typeable, Data)
 
-instance Aeson.ToJSON Identifier
+data Constant =
+    NumericConstant (Either Integer Scientific)
+  | StringConstant String
+  | CharConstant Char
+  | BooleanConstant Bool
+  deriving (Eq, Ord, Show, Typeable, Data)
 
 data TermF t =
-    Constant
+    Constant Constant
   | Variable Identifier
   | Abstraction Identifier t
   | Application t t
   | TypeAbstraction TypeLevel.Identifier t
   | TypeApplication t TypeLevel.Type
-  | RecordIntroduction (Map Text t)
+  | RecordIntroduction (Map String t)
   | RecordElimination t Identifier
-  deriving (Eq, Ord, Show, Functor, Generic)
+  deriving (Eq, Ord, Show, Functor, Typeable, Data)
 
-instance Aeson.ToJSON t => Aeson.ToJSON (TermF t)
+newtype Term = Term (TermF Term)
+  deriving (Eq, Ord, Show, Typeable, Data)
 
-newtype Term = Term (Mu TermF)
-
-instance Aeson.ToJSON Term where
-  toJSON (Term fix) = Fix.cata Aeson.toJSON fix
+toMu :: Term -> Mu TermF
+toMu (Term tf) = Fix (fmap toMu tf)
 
 instance Fix.EqF TermF where equalF = (==)
 instance Fix.OrdF TermF where compareF = compare
@@ -45,7 +51,7 @@ freeVarsF :: TermF (Set Identifier) -> Set Identifier
 freeVarsF term = case term of
 
   -- A constant does not have any free variables.
-  Constant ->
+  Constant _ ->
     Set.empty
 
   -- A variable itself is inherently a free variable.
@@ -80,13 +86,13 @@ freeVarsF term = case term of
     vars
 
 freeVars :: Term -> Set Identifier
-freeVars (Term mu) = Fix.cata freeVarsF mu
+freeVars t = Fix.cata freeVarsF (toMu t)
 
 freeTypeVarsF :: TermF (Set TypeLevel.Identifier) -> Set TypeLevel.Identifier
 freeTypeVarsF term = case term of
 
   -- A constant doesn't have any free type variables.
-  Constant ->
+  Constant _ ->
     Set.empty
 
   -- A type variable itself is inherently a free variable.
@@ -122,4 +128,4 @@ freeTypeVarsF term = case term of
     typeVars
 
 freeTypeVars :: Term -> Set TypeLevel.Identifier
-freeTypeVars (Term mu) = Fix.cata freeTypeVarsF mu
+freeTypeVars t = Fix.cata freeTypeVarsF (toMu t)
