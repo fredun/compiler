@@ -42,23 +42,27 @@ constant :: Trifecta.Parser TermLevel.Constant
 constant =
   Trifecta.parens $
 
-    TermLevel.NumericConstant <$>
-      (Trifecta.symbol "numeric" *> Trifecta.integerOrScientific)
+    TermLevel.NumericConstant
+      <$ Trifecta.symbol "numeric"
+      <*> Trifecta.integerOrScientific
 
     <|>
 
-    TermLevel.CharConstant <$>
-      (Trifecta.symbol "char" *> Trifecta.charLiteral)
+    TermLevel.CharConstant
+      <$ Trifecta.symbol "char"
+      <*> Trifecta.charLiteral
 
     <|>
 
-    TermLevel.StringConstant <$>
-      (Trifecta.symbol "string" *> Trifecta.stringLiteral)
+    TermLevel.StringConstant
+      <$ Trifecta.symbol "string"
+      <*> Trifecta.stringLiteral
 
     <|>
 
-    TermLevel.BooleanConstant <$>
-      (Trifecta.symbol "boolean" *> boolean)
+    TermLevel.BooleanConstant
+      <$ Trifecta.symbol "boolean"
+      <*> boolean
 
 
 identifier :: Trifecta.Parser TermLevel.Identifier
@@ -76,7 +80,8 @@ parseType =
   Trifecta.parens $ fmap TypeLevel.Type $
 
     TypeLevel.Variable
-      <$> (Trifecta.symbol "variable" *> typeIdentifier)
+      <$ Trifecta.symbol "variable"
+      <*> typeIdentifier
 
 
 term :: Trifecta.Parser TermLevel.Term
@@ -84,33 +89,39 @@ term =
   Trifecta.parens $ fmap TermLevel.Term $
 
     TermLevel.Constant
-      <$> (Trifecta.symbol "constant" *> constant)
+      <$ Trifecta.symbol "constant"
+      <*> constant
 
     <|>
 
     TermLevel.Variable
-      <$> (Trifecta.symbol "variable" *> identifier)
+      <$ Trifecta.symbol "variable"
+      <*> identifier
 
     <|>
 
     TermLevel.Abstraction
-      <$> (Trifecta.symbol "abstraction" *> identifier)
+      <$ Trifecta.symbol "abstraction"
+      <*> identifier
       <*> term
 
     <|>
 
     TermLevel.Application
-      <$> (Trifecta.symbol "application" *> term)
+      <$ Trifecta.symbol "application"
+      <*> term
       <*> term
 
     <|>
 
     TermLevel.TypeAbstraction
-      <$> (Trifecta.symbol "type-abstraction" *> typeIdentifier)
+      <$ Trifecta.symbol "type-abstraction"
+      <*> typeIdentifier
       <*> term
 
     <|>
 
     TermLevel.TypeApplication
-      <$> (Trifecta.symbol "type-application" *> term)
+      <$ Trifecta.symbol "type-application"
+      <*> term
       <*> parseType
