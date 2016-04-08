@@ -66,6 +66,19 @@ identifier =
   TermLevel.Identifier <$> Trifecta.stringLiteral
 
 
+typeIdentifier :: Trifecta.Parser TypeLevel.Identifier
+typeIdentifier =
+  TypeLevel.Identifier <$> Trifecta.stringLiteral
+
+
+parseType :: Trifecta.Parser TypeLevel.Type
+parseType =
+  Trifecta.parens $ fmap TypeLevel.Type $
+
+    TypeLevel.Variable
+      <$> (Trifecta.symbol "variable" *> typeIdentifier)
+
+
 term :: Trifecta.Parser TermLevel.Term
 term =
   Trifecta.parens $ fmap TermLevel.Term $
@@ -89,3 +102,15 @@ term =
     TermLevel.Application
       <$> (Trifecta.symbol "application" *> term)
       <*> term
+
+    <|>
+
+    TermLevel.TypeAbstraction
+      <$> (Trifecta.symbol "type-abstraction" *> typeIdentifier)
+      <*> term
+
+    <|>
+
+    TermLevel.TypeApplication
+      <$> (Trifecta.symbol "type-application" *> term)
+      <*> parseType

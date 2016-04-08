@@ -48,37 +48,15 @@ spec = do
       res `shouldBe` Set.fromList [TermLevel.Identifier "foo", TermLevel.Identifier "bar"]
 
     it "retrieves one from a type abstraction" $ do
-      let res =
-            TermLevel.freeVars
-              ( TermLevel.Term
-                ( TermLevel.TypeAbstraction
-                  ( TypeLevel.Identifier "foo" )
-                  ( TermLevel.Term
-                    ( TermLevel.Variable
-                      ( TermLevel.Identifier "bar" )
-                    )
-                  )
-                )
-              )
+      let res = TermLevel.freeVars [dsl|
+        (type-abstraction "foo" (variable "bar"))
+      |]
       res `shouldBe` Set.fromList [TermLevel.Identifier "bar"]
 
     it "retrieves one from a type application" $ do
-      let res =
-            TermLevel.freeVars
-              ( TermLevel.Term
-                ( TermLevel.TypeApplication
-                  ( TermLevel.Term
-                    ( TermLevel.Variable
-                      ( TermLevel.Identifier "bar" )
-                    )
-                  )
-                  ( TypeLevel.Type
-                    ( TypeLevel.Variable
-                      ( TypeLevel.Identifier "foo" )
-                    )
-                  )
-                )
-              )
+      let res = TermLevel.freeVars [dsl|
+        (type-application (variable "bar") (variable "foo"))
+      |]
       res `shouldBe` Set.fromList [TermLevel.Identifier "bar"]
 
     it "retrieves many from a record introduction" $ do
