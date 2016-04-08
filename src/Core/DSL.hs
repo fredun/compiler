@@ -80,7 +80,7 @@ parseType =
   Trifecta.parens $ fmap TypeLevel.Type $
 
     TypeLevel.Variable
-      <$ Trifecta.symbol "variable"
+      <$ Trifecta.symbol "type-variable"
       <*> typeIdentifier
 
 

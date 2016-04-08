@@ -55,7 +55,7 @@ spec = do
 
     it "retrieves one from a type application" $ do
       let res = TermLevel.freeVars [dsl|
-        (type-application (variable "bar") (variable "foo"))
+        (type-application (variable "bar") (type-variable "foo"))
       |]
       res `shouldBe` Set.fromList [TermLevel.Identifier "bar"]
 
