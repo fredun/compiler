@@ -22,7 +22,8 @@ library
                        Frontend.Parser,
                        Core.TermLevel,
                        Core.TypeLevel,
-                       Core.DSL
+                       IR.Parser,
+                       IR.DSL
   build-depends:       aeson,
                        base,
                        containers,

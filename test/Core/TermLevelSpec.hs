@@ -10,7 +10,7 @@ import qualified Data.Map as Map
 import qualified Core.TypeLevel as TypeLevel
 import qualified Core.TermLevel as TermLevel
 
-import Core.DSL
+import IR.DSL
 
 spec :: Spec
 spec = do
@@ -18,43 +18,43 @@ spec = do
   describe "freeVars" $ do
 
     it "retrieves none from a constant" $ do
-      let res = TermLevel.freeVars [dsl|
+      let res = TermLevel.freeVars [termDSL|
         (constant (numeric 42))
       |]
       res `shouldBe` Set.fromList []
 
     it "retrieves one from a variable" $ do
-      let res = TermLevel.freeVars [dsl|
+      let res = TermLevel.freeVars [termDSL|
         (variable "foo")
       |]
       res `shouldBe` Set.fromList [TermLevel.Identifier "foo"]
 
     it "retrieves none when shadowed by an abstraction" $ do
-      let res = TermLevel.freeVars [dsl|
+      let res = TermLevel.freeVars [termDSL|
         (abstraction "foo" (variable "foo"))
       |]
       res `shouldBe` Set.fromList []
 
     it "retrieves one when not shadowed by an abstraction" $ do
-      let res = TermLevel.freeVars [dsl|
+      let res = TermLevel.freeVars [termDSL|
         (abstraction "foo" (variable "bar"))
       |]
       res `shouldBe` Set.fromList [TermLevel.Identifier "bar"]
 
     it "retrieves two from an application" $ do
-      let res = TermLevel.freeVars [dsl|
+      let res = TermLevel.freeVars [termDSL|
         (application (variable "foo") (variable "bar"))
       |]
       res `shouldBe` Set.fromList [TermLevel.Identifier "foo", TermLevel.Identifier "bar"]
 
     it "retrieves one from a type abstraction" $ do
-      let res = TermLevel.freeVars [dsl|
+      let res = TermLevel.freeVars [termDSL|
         (type-abstraction "foo" (variable "bar"))
       |]
       res `shouldBe` Set.fromList [TermLevel.Identifier "bar"]
 
     it "retrieves one from a type application" $ do
-      let res = TermLevel.freeVars [dsl|
+      let res = TermLevel.freeVars [termDSL|
         (type-application (variable "bar") (type-variable "foo"))
       |]
       res `shouldBe` Set.fromList [TermLevel.Identifier "bar"]

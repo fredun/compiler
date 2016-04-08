@@ -1,32 +1,11 @@
-module Core.DSL (dsl) where
+module IR.Parser where
 
 import qualified Text.Trifecta as Trifecta
 
 import Control.Applicative ((<|>))
 
-import Language.Haskell.TH.Quote
-
 import qualified Core.TypeLevel as TypeLevel
 import qualified Core.TermLevel as TermLevel
-
-
-dsl :: QuasiQuoter
-dsl =
-  QuasiQuoter
-    { quoteExp = \s -> do
-        t <- parse (filter (/= '\r') s)
-        dataToExpQ (const Nothing) t
-    , quotePat = error "Cannot use dsl as a pattern"
-    , quoteType = error "Cannot use dsl as a type"
-    , quoteDec = error "Cannot use dsl as a dec"
-    }
-
-
-parse :: Monad m => String -> m TermLevel.Term
-parse s =
-  case Trifecta.parseString (Trifecta.whiteSpace >> term) mempty s of
-    Trifecta.Failure err -> fail (show err)
-    Trifecta.Success res -> return res
 
 
 boolean :: Trifecta.Parser Bool
