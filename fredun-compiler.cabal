@@ -55,8 +55,10 @@ Test-Suite test
                        containers,
                        fixplate,
                        fredun-compiler,
-                       hspec,
-                       megaparsec
+                       megaparsec,
+                       tasty,
+                       tasty-hunit,
+                       tasty-ant-xml
   hs-source-dirs:      test
   default-language:    Haskell2010
   default-extensions:  OverloadedStrings,

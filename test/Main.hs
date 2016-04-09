@@ -1,19 +1,24 @@
 module Main where
 
-import Test.Hspec
+import Test.Tasty
+import Test.Tasty.HUnit
+import Test.Tasty.Runners (consoleTestReporter)
+import Test.Tasty.Runners.AntXML
 
 import qualified ParserSpec
 import qualified Core.TypeLevelSpec
 import qualified Core.TermLevelSpec
 
+
 main :: IO ()
-main = hspec spec
+main = defaultMainWithIngredients [antXMLRunner, consoleTestReporter] tests
 
-spec :: Spec
-spec = do
-  describe "Parser" ParserSpec.spec
 
-  describe "Core" $ do
-
-    describe "TypeLevel" Core.TypeLevelSpec.spec
-    describe "TermLevel" Core.TermLevelSpec.spec
+tests :: TestTree
+tests = testGroup "tests"
+  [ ParserSpec.tests
+  , testGroup "Core"
+    [ Core.TypeLevelSpec.tests
+    , Core.TermLevelSpec.tests
+    ]
+  ]
