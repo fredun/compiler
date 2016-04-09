@@ -35,7 +35,7 @@ data TermF t =
   | TypeApplication t TypeLevel.Type
   | RecordIntroduction (Map String t)
   | RecordElimination t Identifier
-  deriving (Eq, Ord, Show, Functor, Typeable, Data)
+  deriving (Eq, Ord, Show, Functor, Foldable, Typeable, Data)
 
 deriving instance Data (Mu TermF)
 

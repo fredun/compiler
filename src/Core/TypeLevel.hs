@@ -32,7 +32,7 @@ data TypeF t =
   | Variable Identifier
   | Abstraction Identifier t
   | Application t t
-  deriving (Eq, Ord, Show, Functor, Typeable, Data)
+  deriving (Eq, Ord, Show, Functor, Foldable, Typeable, Data)
 
 deriving instance Data (Mu TypeF)
 
