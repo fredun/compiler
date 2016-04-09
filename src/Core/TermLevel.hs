@@ -22,9 +22,14 @@ newtype Identifier = Identifier String
 newtype BitWidth = BitWidth Integer
   deriving (Eq, Ord, Show, Typeable, Data)
 
+data Numeric =
+    NumericFloat BitWidth Scientific
+  | NumericSigned BitWidth Integer
+  | NumericUnsigned BitWidth Integer
+  deriving (Eq, Ord, Show, Typeable, Data)
+
 data Constant =
-    IntegerConstant BitWidth Integer
-  | ScientificConstant BitWidth Scientific
+    NumericConstant Numeric
   | StringConstant String
   | CharConstant Char
   | BooleanConstant Bool

@@ -25,21 +25,36 @@ bitwidth =
     <$> Trifecta.integer
 
 
-constant :: Trifecta.Parser TermLevel.Constant
-constant =
+numeric :: Trifecta.Parser TermLevel.Numeric
+numeric =
   Trifecta.parens $
 
-    TermLevel.IntegerConstant
+    TermLevel.NumericFloat
+      <$ Trifecta.symbol "float"
+      <*> bitwidth
+      <*> Trifecta.scientific
+
+    <|>
+
+    TermLevel.NumericSigned
       <$ Trifecta.symbol "integer"
       <*> bitwidth
       <*> Trifecta.integer
 
     <|>
 
-    TermLevel.ScientificConstant
-      <$ Trifecta.symbol "float"
+    TermLevel.NumericUnsigned
+      <$ Trifecta.symbol "unsigned"
       <*> bitwidth
-      <*> Trifecta.scientific
+      <*> Trifecta.integer
+
+constant :: Trifecta.Parser TermLevel.Constant
+constant =
+  Trifecta.parens $
+
+    TermLevel.NumericConstant
+      <$ Trifecta.symbol "numeric"
+      <*> numeric
 
     <|>
 
