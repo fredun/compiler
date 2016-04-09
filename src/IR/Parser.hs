@@ -97,7 +97,7 @@ termF inner =
 
     TermLevel.Abstraction
       <$ Trifecta.symbol "abstraction"
-      <*> identifier
+      <*> Trifecta.many identifier
       <*> inner
 
     <|>
@@ -105,13 +105,13 @@ termF inner =
     TermLevel.Application
       <$ Trifecta.symbol "application"
       <*> inner
-      <*> inner
+      <*> Trifecta.many inner
 
     <|>
 
     TermLevel.TypeAbstraction
       <$ Trifecta.symbol "type-abstraction"
-      <*> typeIdentifier
+      <*> Trifecta.many typeIdentifier
       <*> inner
 
     <|>
@@ -119,7 +119,7 @@ termF inner =
     TermLevel.TypeApplication
       <$ Trifecta.symbol "type-application"
       <*> inner
-      <*> parseType
+      <*> Trifecta.many parseType
 
 
 muTermF :: Trifecta.Parser (Mu TermLevel.TermF)

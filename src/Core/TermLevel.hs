@@ -33,10 +33,10 @@ data Constant =
 data TermF t =
     Constant Constant
   | Variable Identifier
-  | Abstraction Identifier t
-  | Application t t
-  | TypeAbstraction TypeLevel.Identifier t
-  | TypeApplication t TypeLevel.Type
+  | Abstraction [Identifier] t
+  | Application t [t]
+  | TypeAbstraction [TypeLevel.Identifier] t
+  | TypeApplication t [TypeLevel.Type]
   | RecordIntroduction (Map String t)
   | RecordElimination t Identifier
   deriving (Eq, Ord, Show, Functor, Foldable, Typeable, Data)
@@ -61,15 +61,16 @@ freeVarsF term = case term of
   Variable var ->
     Set.singleton var
 
-  -- An abstraction creates a binding for a variable,
-  -- and thus eliminates a free variable from its body.
-  Abstraction var vars ->
-    Set.delete var vars
+  -- An abstraction creates binding for variables,
+  -- and thus eliminates free variables from its body.
+  Abstraction argVars vars ->
+    Set.difference vars (Set.fromList argVars)
 
-  -- An application consists of two terms, both of which
+  -- An application consists of a body term,
+  -- and multiple argument terms, all of which
   -- can have free variables.
   Application leftVars rightVars ->
-    Set.union leftVars rightVars
+    Set.union leftVars (Set.unions rightVars)
 
   -- A type abstration has a body that might contain free variables.
   TypeAbstraction _ vars ->
@@ -109,17 +110,17 @@ freeTypeVarsF term = case term of
   -- An application consists of two terms, both of which
   -- can have free type variables.
   Application leftVars rightVars ->
-    Set.union leftVars rightVars
+    Set.union leftVars (Set.unions rightVars)
 
   -- A type abstraction creates a binding for a type variable,
   -- and thus eliminates a free type variable from its body.
-  TypeAbstraction typeVar typeVars ->
-    Set.delete typeVar typeVars
+  TypeAbstraction argTypeVars typeVars ->
+    Set.difference typeVars (Set.fromList argTypeVars)
 
   -- A type application consists of a term and a type, both of which
   -- can have free type variables.
-  TypeApplication typeVars typ ->
-    Set.union typeVars (TypeLevel.freeVars typ)
+  TypeApplication typeVars types ->
+    Set.union typeVars (Set.unions (map TypeLevel.freeVars types))
 
   -- A record introduction has a term per record field, all of which
   -- might contain free type variables.
