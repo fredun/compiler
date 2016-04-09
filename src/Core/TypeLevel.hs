@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveDataTypeable, StandaloneDeriving, FlexibleInstances #-}
 
 module Core.TypeLevel where
 
@@ -34,15 +34,14 @@ data TypeF t =
   | Application t t
   deriving (Eq, Ord, Show, Functor, Typeable, Data)
 
-newtype Type = Type (TypeF Type)
-  deriving (Eq, Ord, Show, Typeable, Data)
-
-toMu :: Type -> Mu TypeF
-toMu (Type tf) = Fix (fmap toMu tf)
+deriving instance Data (Mu TypeF)
 
 instance Fix.EqF TypeF where equalF = (==)
 instance Fix.OrdF TypeF where compareF = compare
 instance Fix.ShowF TypeF where showsPrecF = showsPrec
+
+newtype Type = Type (Mu TypeF)
+  deriving (Eq, Ord, Show, Typeable, Data)
 
 kindOfConstant :: Constant -> Kind
 kindOfConstant constant = case constant of
@@ -95,4 +94,4 @@ freeVarsF typ = case typ of
     Set.union leftVars rightVars
 
 freeVars :: Type -> Set Identifier
-freeVars t = Fix.cata freeVarsF (toMu t)
+freeVars (Type mu) = Fix.cata freeVarsF mu

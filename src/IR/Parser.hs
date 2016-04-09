@@ -4,6 +4,8 @@ import qualified Text.Trifecta as Trifecta
 
 import Control.Applicative ((<|>))
 
+import Data.Generics.Fixplate (Mu(..))
+
 import qualified Core.TypeLevel as TypeLevel
 import qualified Core.TermLevel as TermLevel
 
@@ -56,16 +58,16 @@ typeIdentifier =
 
 parseType :: Trifecta.Parser TypeLevel.Type
 parseType =
-  Trifecta.parens $ fmap TypeLevel.Type $
+  Trifecta.parens $ fmap (TypeLevel.Type . Fix) $
 
     TypeLevel.Variable
       <$ Trifecta.symbol "type-variable"
       <*> typeIdentifier
 
 
-term :: Trifecta.Parser TermLevel.Term
-term =
-  Trifecta.parens $ fmap TermLevel.Term $
+muTermF :: Trifecta.Parser (Mu TermLevel.TermF)
+muTermF =
+  Trifecta.parens $ fmap Fix $
 
     TermLevel.Constant
       <$ Trifecta.symbol "constant"
@@ -82,25 +84,30 @@ term =
     TermLevel.Abstraction
       <$ Trifecta.symbol "abstraction"
       <*> identifier
-      <*> term
+      <*> muTermF
 
     <|>
 
     TermLevel.Application
       <$ Trifecta.symbol "application"
-      <*> term
-      <*> term
+      <*> muTermF
+      <*> muTermF
 
     <|>
 
     TermLevel.TypeAbstraction
       <$ Trifecta.symbol "type-abstraction"
       <*> typeIdentifier
-      <*> term
+      <*> muTermF
 
     <|>
 
     TermLevel.TypeApplication
       <$ Trifecta.symbol "type-application"
-      <*> term
+      <*> muTermF
       <*> parseType
+
+
+term :: Trifecta.Parser TermLevel.Term
+term =
+  TermLevel.Term <$> muTermF

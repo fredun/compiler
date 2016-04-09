@@ -4,6 +4,7 @@ module Core.TermLevelSpec where
 
 import Test.Hspec
 
+import Data.Generics.Fixplate (Mu(..))
 import qualified Data.Set as Set
 import qualified Data.Map as Map
 
@@ -63,21 +64,23 @@ spec = do
       let res =
             TermLevel.freeVars
               ( TermLevel.Term
-                ( TermLevel.RecordIntroduction
-                  ( Map.fromList
-                    [ ( "1"
-                      , TermLevel.Term
-                        ( TermLevel.Variable
-                          ( TermLevel.Identifier "bar" )
+                ( Fix
+                  ( TermLevel.RecordIntroduction
+                    ( Map.fromList
+                      [ ( "1"
+                        , Fix
+                          ( TermLevel.Variable
+                            ( TermLevel.Identifier "bar" )
+                          )
                         )
-                      )
-                    , ( "2"
-                      , TermLevel.Term
-                        ( TermLevel.Variable
-                          ( TermLevel.Identifier "foo" )
+                      , ( "2"
+                        , Fix
+                          ( TermLevel.Variable
+                            ( TermLevel.Identifier "foo" )
+                          )
                         )
-                      )
-                    ]
+                      ]
+                    )
                   )
                 )
               )
@@ -87,13 +90,15 @@ spec = do
       let res =
             TermLevel.freeVars
               ( TermLevel.Term
-                ( TermLevel.RecordElimination
-                  ( TermLevel.Term
-                    ( TermLevel.Variable
-                      ( TermLevel.Identifier "bar" )
+                ( Fix
+                  ( TermLevel.RecordElimination
+                    ( Fix
+                      ( TermLevel.Variable
+                        ( TermLevel.Identifier "bar" )
+                      )
                     )
+                    ( TermLevel.Identifier "foo" )
                   )
-                  ( TermLevel.Identifier "foo" )
                 )
               )
       res `shouldBe` Set.fromList [TermLevel.Identifier "bar"]

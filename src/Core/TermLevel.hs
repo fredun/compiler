@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveDataTypeable, StandaloneDeriving, FlexibleInstances #-}
 
 module Core.TermLevel where
 
@@ -37,15 +37,14 @@ data TermF t =
   | RecordElimination t Identifier
   deriving (Eq, Ord, Show, Functor, Typeable, Data)
 
-newtype Term = Term (TermF Term)
-  deriving (Eq, Ord, Show, Typeable, Data)
-
-toMu :: Term -> Mu TermF
-toMu (Term tf) = Fix (fmap toMu tf)
+deriving instance Data (Mu TermF)
 
 instance Fix.EqF TermF where equalF = (==)
 instance Fix.OrdF TermF where compareF = compare
 instance Fix.ShowF TermF where showsPrecF = showsPrec
+
+newtype Term = Term (Mu TermF)
+  deriving (Eq, Ord, Show, Typeable, Data)
 
 freeVarsF :: TermF (Set Identifier) -> Set Identifier
 freeVarsF term = case term of
@@ -86,7 +85,7 @@ freeVarsF term = case term of
     vars
 
 freeVars :: Term -> Set Identifier
-freeVars t = Fix.cata freeVarsF (toMu t)
+freeVars (Term mu) = Fix.cata freeVarsF mu
 
 freeTypeVarsF :: TermF (Set TypeLevel.Identifier) -> Set TypeLevel.Identifier
 freeTypeVarsF term = case term of
@@ -128,4 +127,4 @@ freeTypeVarsF term = case term of
     typeVars
 
 freeTypeVars :: Term -> Set TypeLevel.Identifier
-freeTypeVars t = Fix.cata freeTypeVarsF (toMu t)
+freeTypeVars (Term mu) = Fix.cata freeTypeVarsF mu
