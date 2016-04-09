@@ -19,8 +19,12 @@ import qualified Core.TypeLevel as TypeLevel
 newtype Identifier = Identifier String
   deriving (Eq, Ord, Show, Typeable, Data)
 
+newtype BitWidth = BitWidth Integer
+  deriving (Eq, Ord, Show, Typeable, Data)
+
 data Constant =
-    NumericConstant (Either Integer Scientific)
+    IntegerConstant BitWidth Integer
+  | ScientificConstant BitWidth Scientific
   | StringConstant String
   | CharConstant Char
   | BooleanConstant Bool

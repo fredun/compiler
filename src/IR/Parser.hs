@@ -19,13 +19,27 @@ boolean =
   False <$ Trifecta.symbol "false"
 
 
+bitwidth :: Trifecta.Parser TermLevel.BitWidth
+bitwidth =
+  TermLevel.BitWidth
+    <$> Trifecta.integer
+
+
 constant :: Trifecta.Parser TermLevel.Constant
 constant =
   Trifecta.parens $
 
-    TermLevel.NumericConstant
-      <$ Trifecta.symbol "numeric"
-      <*> Trifecta.integerOrScientific
+    TermLevel.IntegerConstant
+      <$ Trifecta.symbol "integer"
+      <*> bitwidth
+      <*> Trifecta.integer
+
+    <|>
+
+    TermLevel.ScientificConstant
+      <$ Trifecta.symbol "float"
+      <*> bitwidth
+      <*> Trifecta.scientific
 
     <|>
 

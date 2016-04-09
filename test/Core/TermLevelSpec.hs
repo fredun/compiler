@@ -21,7 +21,7 @@ tests = testGroup "TermLevel"
 
     [ testCase "retrieves none from a constant" $ do
         let res = TermLevel.freeVars [termDSL|
-          (constant (numeric 42))
+          (constant (integer 32 42))
         |]
         res @?= Set.fromList []
 
