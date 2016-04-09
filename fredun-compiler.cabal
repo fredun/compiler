@@ -43,8 +43,11 @@ library
 executable fredun-compiler
   main-is:             Main.hs
   -- other-extensions:
-  build-depends:       base,
-                       fredun-compiler
+  build-depends:       ansi-wl-pprint,
+                       base,
+                       bytestring,
+                       fredun-compiler,
+                       trifecta
   hs-source-dirs:      app
   default-language:    Haskell2010
 
