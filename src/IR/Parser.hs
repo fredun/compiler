@@ -65,9 +65,9 @@ parseType =
       <*> typeIdentifier
 
 
-muTermF :: Trifecta.Parser (Mu TermLevel.TermF)
-muTermF =
-  Trifecta.parens $ fmap Fix $
+termF :: Trifecta.Parser t -> Trifecta.Parser (TermLevel.TermF t)
+termF inner =
+  Trifecta.parens $
 
     TermLevel.Constant
       <$ Trifecta.symbol "constant"
@@ -84,28 +84,32 @@ muTermF =
     TermLevel.Abstraction
       <$ Trifecta.symbol "abstraction"
       <*> identifier
-      <*> muTermF
+      <*> inner
 
     <|>
 
     TermLevel.Application
       <$ Trifecta.symbol "application"
-      <*> muTermF
-      <*> muTermF
+      <*> inner
+      <*> inner
 
     <|>
 
     TermLevel.TypeAbstraction
       <$ Trifecta.symbol "type-abstraction"
       <*> typeIdentifier
-      <*> muTermF
+      <*> inner
 
     <|>
 
     TermLevel.TypeApplication
       <$ Trifecta.symbol "type-application"
-      <*> muTermF
+      <*> inner
       <*> parseType
+
+
+muTermF :: Trifecta.Parser (Mu TermLevel.TermF)
+muTermF = Fix <$> termF muTermF
 
 
 term :: Trifecta.Parser TermLevel.Term
