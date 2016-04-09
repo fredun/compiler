@@ -12,4 +12,5 @@ dependencies:
 
 test:
   override:
-    - stack test --test-arguments "--xml $CIRCLE_TEST_REPORTS/junit.xml"
+    - mkdir -p $CIRCLE_TEST_REPORTS/tasty
+    - stack test --test-arguments "--xml $CIRCLE_TEST_REPORTS/tasty/junit.xml"
