@@ -39,12 +39,22 @@ genBinOp (TermLevel.Operator op) =
     "-" -> JS.JSBinOpMinus JS.JSNoAnnot
     "*" -> JS.JSBinOpTimes JS.JSNoAnnot
     "/" -> JS.JSBinOpDivide JS.JSNoAnnot
+    "%" -> JS.JSBinOpMod JS.JSNoAnnot
+    "<=" -> JS.JSBinOpLe JS.JSNoAnnot
+    "<" -> JS.JSBinOpLt JS.JSNoAnnot
+    ">=" -> JS.JSBinOpGe JS.JSNoAnnot
+    ">" -> JS.JSBinOpGt JS.JSNoAnnot
+    "==" -> JS.JSBinOpStrictEq JS.JSNoAnnot
+    "!=" -> JS.JSBinOpStrictNeq JS.JSNoAnnot
+    "&&" -> JS.JSBinOpAnd JS.JSNoAnnot
+    "||" -> JS.JSBinOpOr JS.JSNoAnnot
     _ -> error "unknown binary operator"
 
 
 genUnOp :: TermLevel.Operator -> JS.JSUnaryOp
 genUnOp (TermLevel.Operator op) =
   case op of
+    "+" -> JS.JSUnaryOpPlus JS.JSNoAnnot
     "-" -> JS.JSUnaryOpMinus JS.JSNoAnnot
     "!" -> JS.JSUnaryOpNot JS.JSNoAnnot
     _ -> error "unknown binary operator"
