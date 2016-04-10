@@ -149,8 +149,13 @@ genTermF genT termF =
       error "not implemented yet"
 
 
+genTermF' :: (t -> JS.JSExpression) -> TermLevel.TermF t -> JS.JSExpression
+genTermF' genT termF =
+  JS.JSExpressionParen JS.JSNoAnnot (genTermF genT termF) JS.JSNoAnnot
+
+
 genMuTermF :: Mu TermLevel.TermF -> JS.JSExpression
-genMuTermF (Fix termF) = genTermF genMuTermF termF
+genMuTermF (Fix termF) = genTermF' genMuTermF termF
 
 
 genTerm :: TermLevel.Term -> JS.JSExpression
