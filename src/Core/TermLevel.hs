@@ -35,6 +35,14 @@ data Constant =
   | BooleanConstant Bool
   deriving (Eq, Ord, Show, Typeable, Data)
 
+newtype Operator = Operator String
+  deriving (Eq, Ord, Show, Typeable, Data)
+
+data Operation t =
+    BinaryOperation Operator t t
+  | UnaryOperation Operator t
+  deriving (Eq, Ord, Show, Functor, Foldable, Typeable, Data)
+
 data TermF t =
     Constant Constant
   | Variable Identifier
@@ -44,6 +52,7 @@ data TermF t =
   | TypeApplication t [TypeLevel.Type]
   | RecordIntroduction (Map String t)
   | RecordElimination t Identifier
+  | Operation (Operation t)
   deriving (Eq, Ord, Show, Functor, Foldable, Typeable, Data)
 
 deriving instance Data (Mu TermF)
