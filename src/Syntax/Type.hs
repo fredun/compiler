@@ -1,18 +1,19 @@
 {-# LANGUAGE DeriveDataTypeable, StandaloneDeriving, FlexibleInstances #-}
 
-module Core.TypeLevel where
+module Syntax.Type where
 
 import Data.Generics.Fixplate (Mu(..))
 import qualified Data.Generics.Fixplate as Fix
 
 import Data.Set (Set)
-import qualified Data.Set as Set
 
 import Data.Typeable
 import Data.Data
 
+
 newtype Identifier = Identifier String
   deriving (Eq, Ord, Show, Typeable, Data)
+
 
 data Constant =
     PrimitiveConstant
@@ -22,10 +23,12 @@ data Constant =
   | RecordConstant (Set Identifier)
   deriving (Eq, Ord, Show, Typeable, Data)
 
+
 data Kind =
     KindOfTypes
   | KindOfTypeConstructors Kind Kind
   deriving (Eq, Ord, Show, Typeable, Data)
+
 
 data TypeF t =
     Constant Constant
@@ -40,8 +43,10 @@ instance Fix.EqF TypeF where equalF = (==)
 instance Fix.OrdF TypeF where compareF = compare
 instance Fix.ShowF TypeF where showsPrecF = showsPrec
 
+
 newtype Type = Type (Mu TypeF)
   deriving (Eq, Ord, Show, Typeable, Data)
+
 
 kindOfConstant :: Constant -> Kind
 kindOfConstant constant = case constant of
@@ -71,27 +76,3 @@ kindOfConstant constant = case constant of
   -- Records have kind *.
   RecordConstant _ ->
     KindOfTypes
-
-freeVarsF :: TypeF (Set Identifier) -> Set Identifier
-freeVarsF typ = case typ of
-
-  -- A constant doesn't have any free type variables.
-  Constant _ ->
-    Set.empty
-
-  -- A type variable itself is inherently a free variable.
-  Variable var ->
-    Set.singleton var
-
-  -- An abstraction creates a binding for a type variable,
-  -- and thus eliminates a free type variable from its body.
-  Abstraction var vars ->
-    Set.delete var vars
-
-  -- An application consists of two types, both of which
-  -- can have free type variables.
-  Application leftVars rightVars ->
-    Set.union leftVars rightVars
-
-freeVars :: Type -> Set Identifier
-freeVars (Type mu) = Fix.cata freeVarsF mu

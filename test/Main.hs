@@ -6,8 +6,7 @@ import Test.Tasty.Runners (consoleTestReporter)
 import Test.Tasty.Runners.AntXML
 
 import qualified ParserSpec
-import qualified Core.TypeLevelSpec
-import qualified Core.TermLevelSpec
+import qualified Core.FreeVarsSpec
 
 
 main :: IO ()
@@ -18,7 +17,6 @@ tests :: TestTree
 tests = testGroup "tests"
   [ ParserSpec.tests
   , testGroup "Core"
-    [ Core.TypeLevelSpec.tests
-    , Core.TermLevelSpec.tests
+    [ Core.FreeVarsSpec.tests
     ]
   ]

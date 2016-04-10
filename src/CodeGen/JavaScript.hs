@@ -1,12 +1,11 @@
 module CodeGen.JavaScript where
 
-import Data.Generics.Fixplate (Mu(..))
 import qualified Data.Generics.Fixplate as Fix
 
 import qualified Language.JavaScript.Parser.AST as JS
 import qualified Language.JavaScript.Pretty.Printer as JS
 
-import qualified Core.TermLevel as TermLevel
+import qualified Syntax.Term as Term
 
 
 genBoolean :: Bool -> JS.JSExpression
@@ -18,22 +17,22 @@ genBoolean b =
       JS.JSIdentifier JS.JSNoAnnot "false"
 
 
-genNumeric :: TermLevel.Numeric -> JS.JSExpression
+genNumeric :: Term.Numeric -> JS.JSExpression
 genNumeric numeric =
   case numeric of
 
-    TermLevel.NumericFloat _ scientific ->
+    Term.NumericFloat _ scientific ->
       JS.JSDecimal JS.JSNoAnnot (show scientific)
 
-    TermLevel.NumericSigned _ integer ->
+    Term.NumericSigned _ integer ->
       JS.JSDecimal JS.JSNoAnnot (show integer)
 
-    TermLevel.NumericUnsigned _ integer ->
+    Term.NumericUnsigned _ integer ->
       JS.JSDecimal JS.JSNoAnnot (show integer)
 
 
-genBinOp :: TermLevel.Operator -> JS.JSBinOp
-genBinOp (TermLevel.Operator op) =
+genBinOp :: Term.Operator -> JS.JSBinOp
+genBinOp (Term.Operator op) =
   case op of
     "+" -> JS.JSBinOpPlus JS.JSNoAnnot
     "-" -> JS.JSBinOpMinus JS.JSNoAnnot
@@ -51,8 +50,8 @@ genBinOp (TermLevel.Operator op) =
     _ -> error "unknown binary operator"
 
 
-genUnOp :: TermLevel.Operator -> JS.JSUnaryOp
-genUnOp (TermLevel.Operator op) =
+genUnOp :: Term.Operator -> JS.JSUnaryOp
+genUnOp (Term.Operator op) =
   case op of
     "+" -> JS.JSUnaryOpPlus JS.JSNoAnnot
     "-" -> JS.JSUnaryOpMinus JS.JSNoAnnot
@@ -60,34 +59,34 @@ genUnOp (TermLevel.Operator op) =
     _ -> error "unknown binary operator"
 
 
-genConstant :: TermLevel.Constant -> JS.JSExpression
+genConstant :: Term.Constant -> JS.JSExpression
 genConstant constant =
   case constant of
 
-    TermLevel.StringConstant s ->
+    Term.StringConstant s ->
       JS.JSStringLiteral JS.JSNoAnnot s
 
-    TermLevel.CharConstant c ->
+    Term.CharConstant c ->
       JS.JSStringLiteral JS.JSNoAnnot [c]
 
-    TermLevel.BooleanConstant b ->
+    Term.BooleanConstant b ->
       genBoolean b
 
-    TermLevel.NumericConstant n ->
+    Term.NumericConstant n ->
       genNumeric n
 
 
-genIdentifier :: TermLevel.Identifier -> JS.JSExpression
-genIdentifier (TermLevel.Identifier identifier) =
+genIdentifier :: Term.Identifier -> JS.JSExpression
+genIdentifier (Term.Identifier identifier) =
   JS.JSIdentifier JS.JSNoAnnot identifier
 
 
-genIdent :: TermLevel.Identifier -> JS.JSIdent
-genIdent (TermLevel.Identifier identifier) =
+genIdent :: Term.Identifier -> JS.JSIdent
+genIdent (Term.Identifier identifier) =
   JS.JSIdentName JS.JSNoAnnot identifier
 
 
-genArgs :: [TermLevel.Identifier] -> JS.JSCommaList JS.JSIdent
+genArgs :: [Term.Identifier] -> JS.JSCommaList JS.JSIdent
 genArgs list = genCommaList (map genIdent list)
 
 
@@ -107,31 +106,31 @@ genBody expr =
       JS.JSReturn JS.JSNoAnnot (Just expr) (JS.JSSemi JS.JSNoAnnot)
 
 
-genOperation :: TermLevel.Operation JS.JSExpression -> JS.JSExpression
+genOperation :: Term.Operation JS.JSExpression -> JS.JSExpression
 genOperation opn =
   case opn of
 
-    TermLevel.UnaryOperation op arg ->
+    Term.UnaryOperation op arg ->
       JS.JSUnaryExpression (genUnOp op) arg
 
-    TermLevel.BinaryOperation op left right ->
+    Term.BinaryOperation op left right ->
       JS.JSExpressionBinary left (genBinOp op) right
 
 
-genTermF :: TermLevel.TermF JS.JSExpression -> JS.JSExpression
+genTermF :: Term.TermF JS.JSExpression -> JS.JSExpression
 genTermF termF =
   case termF of
 
-    TermLevel.Constant constant ->
+    Term.Constant constant ->
       genConstant constant
 
-    TermLevel.Variable identifier ->
+    Term.Variable identifier ->
       genIdentifier identifier
 
-    TermLevel.Operation opn ->
+    Term.Operation opn ->
       genOperation opn
 
-    TermLevel.Abstraction args body ->
+    Term.Abstraction args body ->
       JS.JSFunctionExpression
         JS.JSNoAnnot
         JS.JSIdentNone
@@ -140,36 +139,36 @@ genTermF termF =
         JS.JSNoAnnot
         (genBody body)
 
-    TermLevel.Application left rights ->
+    Term.Application left rights ->
       JS.JSCallExpression
         left
         JS.JSNoAnnot
         (genCommaList rights)
         JS.JSNoAnnot
 
-    TermLevel.TypeAbstraction _ _ ->
+    Term.TypeAbstraction _ _ ->
       error "not implemented yet"
 
-    TermLevel.TypeApplication _ _ ->
+    Term.TypeApplication _ _ ->
       error "not implemented yet"
 
-    TermLevel.RecordIntroduction _ ->
+    Term.RecordIntroduction _ ->
       error "not implemented yet"
 
-    TermLevel.RecordElimination _ _ ->
+    Term.RecordElimination _ _ ->
       error "not implemented yet"
 
 
-genTermF' :: TermLevel.TermF JS.JSExpression -> JS.JSExpression
+genTermF' :: Term.TermF JS.JSExpression -> JS.JSExpression
 genTermF' termF =
   JS.JSExpressionParen JS.JSNoAnnot (genTermF termF) JS.JSNoAnnot
 
 
-genTerm :: TermLevel.Term -> JS.JSExpression
-genTerm (TermLevel.Term mu) =
+genTerm :: Term.Term -> JS.JSExpression
+genTerm (Term.Term mu) =
   Fix.cata genTermF' mu
 
 
-renderTerm :: TermLevel.Term -> String
+renderTerm :: Term.Term -> String
 renderTerm term =
   JS.renderToString (JS.JSAstExpression (genTerm term) JS.JSNoAnnot)

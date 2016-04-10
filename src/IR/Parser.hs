@@ -6,8 +6,8 @@ import Control.Applicative ((<|>))
 
 import Data.Generics.Fixplate (Mu(..))
 
-import qualified Core.TypeLevel as TypeLevel
-import qualified Core.TermLevel as TermLevel
+import qualified Syntax.Type as Type
+import qualified Syntax.Term as Term
 
 
 boolean :: Trifecta.Parser Bool
@@ -19,70 +19,70 @@ boolean =
   False <$ Trifecta.symbol "false"
 
 
-bitwidth :: Trifecta.Parser TermLevel.BitWidth
+bitwidth :: Trifecta.Parser Term.BitWidth
 bitwidth =
-  TermLevel.BitWidth
+  Term.BitWidth
     <$> Trifecta.integer
 
 
-numeric :: Trifecta.Parser TermLevel.Numeric
+numeric :: Trifecta.Parser Term.Numeric
 numeric =
   Trifecta.parens $
 
-    TermLevel.NumericFloat
+    Term.NumericFloat
       <$ Trifecta.symbol "float"
       <*> bitwidth
       <*> Trifecta.scientific
 
     <|>
 
-    TermLevel.NumericSigned
+    Term.NumericSigned
       <$ Trifecta.symbol "integer"
       <*> bitwidth
       <*> Trifecta.integer
 
     <|>
 
-    TermLevel.NumericUnsigned
+    Term.NumericUnsigned
       <$ Trifecta.symbol "unsigned"
       <*> bitwidth
       <*> Trifecta.integer
 
-constant :: Trifecta.Parser TermLevel.Constant
+constant :: Trifecta.Parser Term.Constant
 constant =
   Trifecta.parens $
 
-    TermLevel.NumericConstant
+    Term.NumericConstant
       <$ Trifecta.symbol "numeric"
       <*> numeric
 
     <|>
 
-    TermLevel.CharConstant
+    Term.CharConstant
       <$ Trifecta.symbol "char"
       <*> Trifecta.charLiteral
 
     <|>
 
-    TermLevel.StringConstant
+    Term.StringConstant
       <$ Trifecta.symbol "string"
       <*> Trifecta.stringLiteral
 
     <|>
 
-    TermLevel.BooleanConstant
+    Term.BooleanConstant
       <$ Trifecta.symbol "boolean"
       <*> boolean
 
-operator :: Trifecta.Parser TermLevel.Operator
+operator :: Trifecta.Parser Term.Operator
 operator =
-  TermLevel.Operator <$> Trifecta.stringLiteral
+  Term.Operator <$> Trifecta.stringLiteral
 
-operation :: Trifecta.Parser t -> Trifecta.Parser (TermLevel.Operation t)
+operation :: Trifecta.Parser t -> Trifecta.Parser (Term.Operation t)
 operation inner =
   Trifecta.parens $
 
-    TermLevel.BinaryOperation
+    Term.BinaryOperation
       <$ Trifecta.symbol "binary"
       <*> operator
       <*> inner
@@ -90,82 +90,82 @@ operation inner =
 
     <|>
 
-    TermLevel.UnaryOperation
+    Term.UnaryOperation
       <$ Trifecta.symbol "unary"
       <*> operator
       <*> inner
 
-identifier :: Trifecta.Parser TermLevel.Identifier
+identifier :: Trifecta.Parser Term.Identifier
 identifier =
-  TermLevel.Identifier <$> Trifecta.stringLiteral
+  Term.Identifier <$> Trifecta.stringLiteral
 
 
-typeIdentifier :: Trifecta.Parser TypeLevel.Identifier
+typeIdentifier :: Trifecta.Parser Type.Identifier
 typeIdentifier =
-  TypeLevel.Identifier <$> Trifecta.stringLiteral
+  Type.Identifier <$> Trifecta.stringLiteral
 
 
-parseType :: Trifecta.Parser TypeLevel.Type
+parseType :: Trifecta.Parser Type.Type
 parseType =
-  Trifecta.parens $ fmap (TypeLevel.Type . Fix) $
+  Trifecta.parens $ fmap (Type.Type . Fix) $
 
-    TypeLevel.Variable
+    Type.Variable
       <$ Trifecta.symbol "type-variable"
       <*> typeIdentifier
 
 
-termF :: Trifecta.Parser t -> Trifecta.Parser (TermLevel.TermF t)
+termF :: Trifecta.Parser t -> Trifecta.Parser (Term.TermF t)
 termF inner =
   Trifecta.parens $
 
-    TermLevel.Constant
+    Term.Constant
       <$ Trifecta.symbol "constant"
       <*> constant
 
     <|>
 
-    TermLevel.Variable
+    Term.Variable
       <$ Trifecta.symbol "variable"
       <*> identifier
 
     <|>
 
-    TermLevel.Abstraction
+    Term.Abstraction
       <$ Trifecta.symbol "abstraction"
       <*> Trifecta.many identifier
       <*> inner
 
     <|>
 
-    TermLevel.Application
+    Term.Application
       <$ Trifecta.symbol "application"
       <*> inner
       <*> Trifecta.many inner
 
     <|>
 
-    TermLevel.TypeAbstraction
+    Term.TypeAbstraction
       <$ Trifecta.symbol "type-abstraction"
       <*> Trifecta.many typeIdentifier
       <*> inner
 
     <|>
 
-    TermLevel.TypeApplication
+    Term.TypeApplication
       <$ Trifecta.symbol "type-application"
       <*> inner
       <*> Trifecta.many parseType
 
     <|>
 
-    TermLevel.Operation
+    Term.Operation
       <$ Trifecta.symbol "operation"
       <*> operation inner
 
-muTermF :: Trifecta.Parser (Mu TermLevel.TermF)
+muTermF :: Trifecta.Parser (Mu Term.TermF)
 muTermF = Fix <$> termF muTermF
 
 
-term :: Trifecta.Parser TermLevel.Term
+term :: Trifecta.Parser Term.Term
 term =
-  TermLevel.Term <$> muTermF
+  Term.Term <$> muTermF
