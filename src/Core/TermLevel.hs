@@ -64,6 +64,22 @@ instance Fix.ShowF TermF where showsPrecF = showsPrec
 newtype Term = Term (Mu TermF)
   deriving (Eq, Ord, Show, Typeable, Data)
 
+
+freeVarsOp :: Ord a => Operation (Set a) -> Set a
+freeVarsOp opn =
+  case opn of
+
+    -- A binary operation has a left and right
+    -- argument. Both arguments may contain free variables.
+    BinaryOperation _ left right ->
+      Set.union left right
+
+    -- A unary operation has an argument which may contain
+    -- free variables.
+    UnaryOperation _ vars ->
+      vars
+
+
 freeVarsF :: TermF (Set Identifier) -> Set Identifier
 freeVarsF term = case term of
 
@@ -74,6 +90,10 @@ freeVarsF term = case term of
   -- A variable itself is inherently a free variable.
   Variable var ->
     Set.singleton var
+
+  -- An operation may contain free variables in its arguments.
+  Operation op ->
+    freeVarsOp op
 
   -- An abstraction creates binding for variables,
   -- and thus eliminates free variables from its body.
@@ -116,6 +136,10 @@ freeTypeVarsF term = case term of
   -- A type variable itself is inherently a free variable.
   Variable _ ->
     Set.empty
+
+  -- An operation may contain free type variables in its arguments.
+  Operation op ->
+    freeVarsOp op
 
   -- An abstraction has a body that might contain free type variables.
   Abstraction _ typeVars ->
