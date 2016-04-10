@@ -31,6 +31,20 @@ genNumeric numeric =
       JS.JSDecimal JS.JSNoAnnot (show integer)
 
 
+genPowOp :: JS.JSExpression -> JS.JSExpression -> JS.JSExpression
+genPowOp left right =
+  JS.JSCallExpressionDot
+    (JS.JSIdentifier JS.JSNoAnnot "Math")
+    JS.JSNoAnnot
+    (
+      JS.JSCallExpression
+        (JS.JSIdentifier JS.JSNoAnnot "pow")
+        JS.JSNoAnnot
+        (genCommaList [left, right])
+        JS.JSNoAnnot
+    )
+
+
 genBinOp :: Term.Operator -> JS.JSBinOp
 genBinOp (Term.Operator op) =
   case op of
@@ -115,14 +129,7 @@ genOperation opn =
 
     Term.BinaryOperation op left right ->
       case op of
-        (Term.Operator "^") -> JS.JSCallExpressionDot
-          (JS.JSIdentifier JS.JSNoAnnot "Math") JS.JSNoAnnot (
-            JS.JSCallExpression
-              (JS.JSIdentifier JS.JSNoAnnot "pow")
-              JS.JSNoAnnot
-              (genCommaList [left, right])
-              JS.JSNoAnnot
-          )
+        (Term.Operator "^") -> genPowOp left right
         _ -> JS.JSExpressionBinary left (genBinOp op) right
 
 
