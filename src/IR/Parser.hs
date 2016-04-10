@@ -74,6 +74,26 @@ constant =
       <$ Trifecta.symbol "boolean"
       <*> boolean
 
+operator :: Trifecta.Parser TermLevel.Operator
+operator =
+  TermLevel.Operator <$> Trifecta.stringLiteral
+
+operation :: Trifecta.Parser t -> Trifecta.Parser (TermLevel.Operation t)
+operation inner =
+  Trifecta.parens $
+
+    TermLevel.BinaryOperation
+      <$ Trifecta.symbol "binary"
+      <*> operator
+      <*> inner
+      <*> inner
+
+    <|>
+
+    TermLevel.UnaryOperation
+      <$ Trifecta.symbol "unary"
+      <*> operator
+      <*> inner
 
 identifier :: Trifecta.Parser TermLevel.Identifier
 identifier =
@@ -136,6 +156,11 @@ termF inner =
       <*> inner
       <*> Trifecta.many parseType
 
+    <|>
+
+    TermLevel.Operation
+      <$ Trifecta.symbol "operation"
+      <*> operation inner
 
 muTermF :: Trifecta.Parser (Mu TermLevel.TermF)
 muTermF = Fix <$> termF muTermF
