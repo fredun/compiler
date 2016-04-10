@@ -17,10 +17,7 @@ extra-source-files:  README.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Frontend.Lexer,
-                       Frontend.Syntax,
-                       Frontend.Parser,
-                       Syntax.Term,
+  exposed-modules:     Syntax.Term,
                        Syntax.Type,
                        Core.FreeVars,
                        Core.Unique,

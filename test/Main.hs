@@ -5,7 +5,6 @@ import Test.Tasty.HUnit
 import Test.Tasty.Runners (consoleTestReporter)
 import Test.Tasty.Runners.AntXML
 
-import qualified ParserSpec
 import qualified Core.FreeVarsSpec
 
 
@@ -15,8 +14,7 @@ main = defaultMainWithIngredients [antXMLRunner, consoleTestReporter] tests
 
 tests :: TestTree
 tests = testGroup "tests"
-  [ ParserSpec.tests
-  , testGroup "Core"
+  [ testGroup "Core"
     [ Core.FreeVarsSpec.tests
     ]
   ]
