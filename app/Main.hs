@@ -8,6 +8,7 @@ import qualified Data.Generics.Fixplate.Draw as Fix
 
 import qualified Core.TermLevel as TermLevel
 import qualified IR.Parser as Parser
+import qualified CodeGen.JavaScript as CodeGen
 
 main :: IO ()
 main = do
@@ -16,5 +17,5 @@ main = do
   case result of
     Trifecta.Failure err ->
       Doc.putDoc (mappend err Doc.linebreak)
-    Trifecta.Success (TermLevel.Term mu) ->
-      Fix.drawTree mu
+    Trifecta.Success term ->
+      putStrLn (CodeGen.renderTerm term)

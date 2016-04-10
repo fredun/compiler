@@ -23,11 +23,13 @@ library
                        Core.TermLevel,
                        Core.TypeLevel,
                        IR.Parser,
-                       IR.DSL
+                       IR.DSL,
+                       CodeGen.JavaScript
   build-depends:       aeson,
                        base,
                        containers,
                        fixplate,
+                       language-javascript,
                        megaparsec,
                        mtl,
                        scientific,
