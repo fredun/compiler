@@ -114,7 +114,16 @@ genOperation opn =
       JS.JSUnaryExpression (genUnOp op) arg
 
     Term.BinaryOperation op left right ->
-      JS.JSExpressionBinary left (genBinOp op) right
+      case op of
+        (Term.Operator "^") -> JS.JSCallExpressionDot
+          (JS.JSIdentifier JS.JSNoAnnot "Math") JS.JSNoAnnot (
+            JS.JSCallExpression
+              (JS.JSIdentifier JS.JSNoAnnot "pow")
+              JS.JSNoAnnot
+              (genCommaList [left, right])
+              JS.JSNoAnnot
+          )
+        _ -> JS.JSExpressionBinary left (genBinOp op) right
 
 
 genTermF :: Term.TermF JS.JSExpression -> JS.JSExpression
