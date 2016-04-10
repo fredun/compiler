@@ -22,11 +22,13 @@ library
                        Frontend.Parser,
                        Core.TermLevel,
                        Core.TypeLevel,
+                       Core.Unique,
                        IR.Parser,
                        IR.DSL,
                        CodeGen.JavaScript
   build-depends:       aeson,
                        base,
+                       concurrent-supply,
                        containers,
                        fixplate,
                        language-javascript,

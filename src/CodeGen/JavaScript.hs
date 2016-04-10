@@ -155,13 +155,11 @@ genTermF' termF =
   JS.JSExpressionParen JS.JSNoAnnot (genTermF termF) JS.JSNoAnnot
 
 
-genMuTermF :: Mu TermLevel.TermF -> JS.JSExpression
-genMuTermF mu = Fix.cata genTermF' mu
-
-
 genTerm :: TermLevel.Term -> JS.JSExpression
-genTerm (TermLevel.Term mu) = genMuTermF mu
+genTerm (TermLevel.Term mu) =
+  Fix.cata genTermF' mu
 
 
 renderTerm :: TermLevel.Term -> String
-renderTerm term = JS.renderToString (JS.JSAstExpression (genTerm term) JS.JSNoAnnot)
+renderTerm term =
+  JS.renderToString (JS.JSAstExpression (genTerm term) JS.JSNoAnnot)
