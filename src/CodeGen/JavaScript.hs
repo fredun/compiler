@@ -1,6 +1,7 @@
 module CodeGen.JavaScript where
 
 import Data.Generics.Fixplate (Mu(..))
+import qualified Data.Generics.Fixplate as Fix
 
 import qualified Language.JavaScript.Parser.AST as JS
 import qualified Language.JavaScript.Pretty.Printer as JS
@@ -96,19 +97,19 @@ genBody expr =
       JS.JSReturn JS.JSNoAnnot (Just expr) (JS.JSSemi JS.JSNoAnnot)
 
 
-genOperation :: (t -> JS.JSExpression) -> TermLevel.Operation t -> JS.JSExpression
-genOperation genT opn =
+genOperation :: TermLevel.Operation JS.JSExpression -> JS.JSExpression
+genOperation opn =
   case opn of
 
     TermLevel.UnaryOperation op arg ->
-      JS.JSUnaryExpression (genUnOp op) (genT arg)
+      JS.JSUnaryExpression (genUnOp op) arg
 
     TermLevel.BinaryOperation op left right ->
-      JS.JSExpressionBinary (genT left) (genBinOp op) (genT right)
+      JS.JSExpressionBinary left (genBinOp op) right
 
 
-genTermF :: (t -> JS.JSExpression) -> TermLevel.TermF t -> JS.JSExpression
-genTermF genT termF =
+genTermF :: TermLevel.TermF JS.JSExpression -> JS.JSExpression
+genTermF termF =
   case termF of
 
     TermLevel.Constant constant ->
@@ -118,7 +119,7 @@ genTermF genT termF =
       genIdentifier identifier
 
     TermLevel.Operation opn ->
-      genOperation genT opn
+      genOperation opn
 
     TermLevel.Abstraction args body ->
       JS.JSFunctionExpression
@@ -127,13 +128,13 @@ genTermF genT termF =
         JS.JSNoAnnot
         (genArgs args)
         JS.JSNoAnnot
-        (genBody (genT body))
+        (genBody body)
 
     TermLevel.Application left rights ->
       JS.JSCallExpression
-        (genT left)
+        left
         JS.JSNoAnnot
-        (genCommaList (map genT rights))
+        (genCommaList rights)
         JS.JSNoAnnot
 
     TermLevel.TypeAbstraction _ _ ->
@@ -149,13 +150,13 @@ genTermF genT termF =
       error "not implemented yet"
 
 
-genTermF' :: (t -> JS.JSExpression) -> TermLevel.TermF t -> JS.JSExpression
-genTermF' genT termF =
-  JS.JSExpressionParen JS.JSNoAnnot (genTermF genT termF) JS.JSNoAnnot
+genTermF' :: TermLevel.TermF JS.JSExpression -> JS.JSExpression
+genTermF' termF =
+  JS.JSExpressionParen JS.JSNoAnnot (genTermF termF) JS.JSNoAnnot
 
 
 genMuTermF :: Mu TermLevel.TermF -> JS.JSExpression
-genMuTermF (Fix termF) = genTermF' genMuTermF termF
+genMuTermF mu = Fix.cata genTermF' mu
 
 
 genTerm :: TermLevel.Term -> JS.JSExpression
