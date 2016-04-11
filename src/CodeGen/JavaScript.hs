@@ -11,8 +11,10 @@ import qualified Syntax.Term as Term
 genBoolean :: Bool -> JS.JSExpression
 genBoolean b =
   case b of
+
     True ->
       JS.JSIdentifier JS.JSNoAnnot "true"
+
     False ->
       JS.JSIdentifier JS.JSNoAnnot "false"
 
@@ -48,29 +50,64 @@ genPowOp left right =
 genBinOp :: Term.Operator -> JS.JSBinOp
 genBinOp (Term.Operator op) =
   case op of
-    "+" -> JS.JSBinOpPlus JS.JSNoAnnot
-    "-" -> JS.JSBinOpMinus JS.JSNoAnnot
-    "*" -> JS.JSBinOpTimes JS.JSNoAnnot
-    "/" -> JS.JSBinOpDivide JS.JSNoAnnot
-    "%" -> JS.JSBinOpMod JS.JSNoAnnot
-    "<=" -> JS.JSBinOpLe JS.JSNoAnnot
-    "<" -> JS.JSBinOpLt JS.JSNoAnnot
-    ">=" -> JS.JSBinOpGe JS.JSNoAnnot
-    ">" -> JS.JSBinOpGt JS.JSNoAnnot
-    "==" -> JS.JSBinOpStrictEq JS.JSNoAnnot
-    "!=" -> JS.JSBinOpStrictNeq JS.JSNoAnnot
-    "&&" -> JS.JSBinOpAnd JS.JSNoAnnot
-    "||" -> JS.JSBinOpOr JS.JSNoAnnot
-    _ -> error "unknown binary operator"
+
+    "+" ->
+      JS.JSBinOpPlus JS.JSNoAnnot
+
+    "-" ->
+      JS.JSBinOpMinus JS.JSNoAnnot
+
+    "*" ->
+      JS.JSBinOpTimes JS.JSNoAnnot
+
+    "/" ->
+      JS.JSBinOpDivide JS.JSNoAnnot
+
+    "%" ->
+      JS.JSBinOpMod JS.JSNoAnnot
+
+    "<=" ->
+      JS.JSBinOpLe JS.JSNoAnnot
+
+    "<" ->
+      JS.JSBinOpLt JS.JSNoAnnot
+
+    ">=" ->
+      JS.JSBinOpGe JS.JSNoAnnot
+
+    ">" ->
+      JS.JSBinOpGt JS.JSNoAnnot
+
+    "==" ->
+      JS.JSBinOpStrictEq JS.JSNoAnnot
+
+    "!=" ->
+      JS.JSBinOpStrictNeq JS.JSNoAnnot
+
+    "&&" ->
+      JS.JSBinOpAnd JS.JSNoAnnot
+
+    "||" ->
+      JS.JSBinOpOr JS.JSNoAnnot
+
+    _
+      -> error "unknown binary operator"
 
 
 genUnOp :: Term.Operator -> JS.JSUnaryOp
 genUnOp (Term.Operator op) =
   case op of
-    "+" -> JS.JSUnaryOpPlus JS.JSNoAnnot
-    "-" -> JS.JSUnaryOpMinus JS.JSNoAnnot
-    "!" -> JS.JSUnaryOpNot JS.JSNoAnnot
-    _ -> error "unknown binary operator"
+
+    "+" ->
+      JS.JSUnaryOpPlus JS.JSNoAnnot
+
+    "-" ->
+      JS.JSUnaryOpMinus JS.JSNoAnnot
+
+    "!" ->
+      JS.JSUnaryOpNot JS.JSNoAnnot
+
+    _ -> error "unknown unary operator"
 
 
 genConstant :: Term.Constant -> JS.JSExpression
@@ -101,15 +138,22 @@ genIdent (Term.Identifier identifier) =
 
 
 genArgs :: [Term.Identifier] -> JS.JSCommaList JS.JSIdent
-genArgs list = genCommaList (map genIdent list)
+genArgs list =
+  genCommaList (map genIdent list)
 
 
 genCommaList :: [a] -> JS.JSCommaList a
 genCommaList list =
   case list of
-    [] -> JS.JSLNil
-    [expr] -> JS.JSLOne expr
-    _ -> JS.JSLCons (genCommaList (init list)) JS.JSNoAnnot (last list)
+
+    [] ->
+      JS.JSLNil
+
+    [expr] ->
+      JS.JSLOne expr
+
+    _ ->
+      JS.JSLCons (genCommaList (init list)) JS.JSNoAnnot (last list)
 
 
 genBody :: JS.JSExpression -> JS.JSBlock
