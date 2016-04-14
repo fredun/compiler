@@ -15,8 +15,27 @@ newtype Identifier = Identifier String
   deriving (Eq, Ord, Show, Typeable, Data)
 
 
+newtype BitWidth = BitWidth Integer
+  deriving (Eq, Ord, Show, Typeable, Data)
+
+
+data NumericPrimitive =
+    FloatPrimitive BitWidth
+  | IntegerPrimitive BitWidth
+  | UnsignedPrimitive BitWidth
+  deriving (Eq, Ord, Show, Typeable, Data)
+
+
+data Primitive =
+    StringPrimitive
+  | NumericPrimitive NumericPrimitive
+  | CharPrimitive
+  | BooleanPrimitive
+  deriving (Eq, Ord, Show, Typeable, Data)
+
+
 data Constant =
-    PrimitiveConstant
+    PrimitiveConstant Primitive
   | FunctionConstant
   | ForAllConstant Kind
   | ExistsConstant Kind
@@ -52,7 +71,7 @@ kindOfConstant :: Constant -> Kind
 kindOfConstant constant = case constant of
 
   -- Primitives (String, Int, etc.) have kind *.
-  PrimitiveConstant ->
+  PrimitiveConstant _ ->
     KindOfTypes
 
   -- The function constructor has kind (* -> (* -> *)).
