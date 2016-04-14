@@ -19,4 +19,4 @@ main = do
     Trifecta.Failure err ->
       Doc.putDoc (mappend err Doc.linebreak)
     Trifecta.Success term ->
-      putStrLn (CodeGen.renderTerm (Unique.uniqueTerm uniqueState term))
+      putStrLn (CodeGen.renderTerm (Unique.uniqueTerm term uniqueState))

@@ -225,7 +225,7 @@ genTermF' termF =
 
 
 genTerm :: Term.Term -> JS.JSExpression
-genTerm (Term.Term mu) =
+genTerm mu =
   Fix.cata genTermF' mu
 
 

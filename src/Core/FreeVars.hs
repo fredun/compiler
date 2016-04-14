@@ -9,7 +9,7 @@ import qualified Data.Map as Map
 import Syntax.Type (Type, TypeF)
 import qualified Syntax.Type as Type
 
-import Syntax.Term (Term(..))
+import Syntax.Term (Term, TermF)
 import qualified Syntax.Term as Term
 
 
@@ -28,9 +28,9 @@ freeVarsOp opn =
       vars
 
 
-freeVarsF :: Term.TermF (Set Term.Identifier) -> Set Term.Identifier
-freeVarsF term =
-  case term of
+freeVarsF :: TermF (Set Term.Identifier) -> Set Term.Identifier
+freeVarsF termF =
+  case termF of
 
     -- A constant does not have any free variables.
     Term.Constant _ ->
@@ -74,13 +74,13 @@ freeVarsF term =
 
 
 freeVars :: Term -> Set Term.Identifier
-freeVars (Term mu) =
+freeVars mu =
   Fix.cata freeVarsF mu
 
 
-freeTypeVarsF :: Term.TermF (Set Type.Identifier) -> Set Type.Identifier
-freeTypeVarsF term =
-  case term of
+freeTypeVarsF :: TermF (Set Type.Identifier) -> Set Type.Identifier
+freeTypeVarsF termF =
+  case termF of
 
     -- A constant doesn't have any free type variables.
     Term.Constant _ ->
@@ -124,7 +124,7 @@ freeTypeVarsF term =
 
 
 freeTypeVars :: Term -> Set Type.Identifier
-freeTypeVars (Term mu) =
+freeTypeVars mu =
   Fix.cata freeTypeVarsF mu
 
 

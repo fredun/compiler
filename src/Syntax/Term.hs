@@ -67,5 +67,4 @@ instance Fix.OrdF TermF where compareF = compare
 instance Fix.ShowF TermF where showsPrecF = showsPrec
 
 
-newtype Term = Term (Mu TermF)
-  deriving (Eq, Ord, Show, Typeable, Data)
+type Term = Mu TermF

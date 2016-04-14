@@ -162,10 +162,7 @@ termF inner =
       <$ Trifecta.symbol "operation"
       <*> operation inner
 
-muTermF :: Trifecta.Parser (Mu Term.TermF)
-muTermF = Fix <$> termF muTermF
-
 
 term :: Trifecta.Parser Term.Term
 term =
-  Term.Term <$> muTermF
+  Fix <$> termF term

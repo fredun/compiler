@@ -9,7 +9,7 @@ import Data.Generics.Fixplate (Mu(..))
 import Data.Map (Map)
 import qualified Data.Map as Map
 
-import Syntax.Term (Term(..))
+import Syntax.Term (Term)
 import qualified Syntax.Term as Term
 
 
@@ -30,11 +30,6 @@ splitState :: UniqueState id -> (UniqueState id, UniqueState id)
 splitState (UniqueState supply mapping) =
   let (supply', supply'') = Supply.splitSupply supply
   in (UniqueState supply' mapping, UniqueState supply'' mapping)
-
-
-uniqueTerm :: UniqueState Term.Identifier -> Term -> Term
-uniqueTerm uniqueState (Term mu) =
-  Term (uniqueMuTermF mu uniqueState)
 
 
 uniqueIdentifier :: Term.Identifier -> Int -> Term.Identifier
@@ -60,17 +55,17 @@ freshIdentifiers ids uniqueState =
       return (uniqueIdentifier identifier tag)
 
 
-uniqueMuTermFs :: Traversable t => t (Mu Term.TermF) -> UniqueState Term.Identifier -> t (Mu Term.TermF)
-uniqueMuTermFs mus =
+uniqueTerms :: Traversable t => t Term -> UniqueState Term.Identifier -> t Term
+uniqueTerms terms =
   State.evalState $
-    State.forM mus $ \mu -> do
+    State.forM terms $ \term -> do
       state <- State.get
       let (uniqueState', uniqueState'') = splitState state
       State.put uniqueState'
-      return $ uniqueMuTermF mu uniqueState''
+      return $ uniqueTerm term uniqueState''
 
 
-uniqueOperation :: Term.Operation (Mu Term.TermF) -> UniqueState Term.Identifier -> Term.Operation (Mu Term.TermF)
+uniqueOperation :: Term.Operation Term -> UniqueState Term.Identifier -> Term.Operation Term
 uniqueOperation opn uniqueState =
   case opn of
 
@@ -80,16 +75,16 @@ uniqueOperation opn uniqueState =
           splitState uniqueState
       in
         Term.BinaryOperation op
-          (uniqueMuTermF left uniqueState')
-          (uniqueMuTermF right uniqueState'')
+          (uniqueTerm left uniqueState')
+          (uniqueTerm right uniqueState'')
 
     Term.UnaryOperation op arg ->
       Term.UnaryOperation op
-        (uniqueMuTermF arg uniqueState)
+        (uniqueTerm arg uniqueState)
 
 
-uniqueMuTermF :: Mu Term.TermF -> UniqueState Term.Identifier -> Mu Term.TermF
-uniqueMuTermF (Fix termF) uniqueState =
+uniqueTerm :: Term -> UniqueState Term.Identifier -> Term
+uniqueTerm (Fix termF) uniqueState =
   Fix $ case termF of
 
     Term.Constant c ->
@@ -111,7 +106,7 @@ uniqueMuTermF (Fix termF) uniqueState =
           freshIdentifiers args uniqueState
       in
         Term.Abstraction args'
-          (uniqueMuTermF body uniqueState')
+          (uniqueTerm body uniqueState')
 
     Term.Application body args ->
       let
@@ -119,19 +114,19 @@ uniqueMuTermF (Fix termF) uniqueState =
           splitState uniqueState
       in
         Term.Application
-          (uniqueMuTermF body uniqueState')
-          (uniqueMuTermFs args uniqueState'')
+          (uniqueTerm body uniqueState')
+          (uniqueTerms args uniqueState'')
 
     Term.TypeAbstraction args body ->
-      Term.TypeAbstraction args (uniqueMuTermF body uniqueState)
+      Term.TypeAbstraction args (uniqueTerm body uniqueState)
 
     Term.TypeApplication body args ->
-      Term.TypeApplication (uniqueMuTermF body uniqueState) args
+      Term.TypeApplication (uniqueTerm body uniqueState) args
 
     Term.RecordIntroduction mapping ->
-      Term.RecordIntroduction (uniqueMuTermFs mapping uniqueState)
+      Term.RecordIntroduction (uniqueTerms mapping uniqueState)
 
     Term.RecordElimination body identifier ->
       Term.RecordElimination
-        (uniqueMuTermF body uniqueState)
+        (uniqueTerm body uniqueState)
         identifier

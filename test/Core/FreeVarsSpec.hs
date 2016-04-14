@@ -65,24 +65,22 @@ tests = testGroup "FreeVaes"
     , testCase "retrieves many from a record introduction" $ do
         let res =
               FreeVars.freeVars
-                ( Term.Term
-                  ( Fix
-                    ( Term.RecordIntroduction
-                      ( Map.fromList
-                        [ ( "1"
-                          , Fix
-                            ( Term.Variable
-                              ( Term.Identifier "bar" )
-                            )
+                ( Fix
+                  ( Term.RecordIntroduction
+                    ( Map.fromList
+                      [ ( "1"
+                        , Fix
+                          ( Term.Variable
+                            ( Term.Identifier "bar" )
                           )
-                        , ( "2"
-                          , Fix
-                            ( Term.Variable
-                              ( Term.Identifier "foo" )
-                            )
+                        )
+                      , ( "2"
+                        , Fix
+                          ( Term.Variable
+                            ( Term.Identifier "foo" )
                           )
-                        ]
-                      )
+                        )
+                      ]
                     )
                   )
                 )
@@ -91,16 +89,14 @@ tests = testGroup "FreeVaes"
     , testCase "retrieves one from a record elimination" $ do
         let res =
               FreeVars.freeVars
-                ( Term.Term
-                  ( Fix
-                    ( Term.RecordElimination
-                      ( Fix
-                        ( Term.Variable
-                          ( Term.Identifier "bar" )
-                        )
+                ( Fix
+                  ( Term.RecordElimination
+                    ( Fix
+                      ( Term.Variable
+                        ( Term.Identifier "bar" )
                       )
-                      ( Term.Identifier "foo" )
                     )
+                    ( Term.Identifier "foo" )
                   )
                 )
         res @?= Set.fromList [Term.Identifier "bar"]
