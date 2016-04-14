@@ -33,6 +33,16 @@ splitState (UniqueState supply mapping) =
   in (UniqueState supply' mapping, UniqueState supply'' mapping)
 
 
+splitting :: Traversable t => t (UniqueState id -> a) -> UniqueState id -> t a
+splitting fs =
+  State.evalState $
+    State.forM fs $ \f -> do
+      state <- State.get
+      let (uniqueState', uniqueState'') = splitState state
+      State.put uniqueState'
+      return $ f uniqueState''
+
+
 uniqueIdentifier :: Term.Identifier -> Int -> Term.Identifier
 uniqueIdentifier (Term.Identifier s) tag =
   Term.Identifier (s ++ "_" ++ show tag)
@@ -54,16 +64,6 @@ freshIdentifiers ids uniqueState =
       State.modify $ \st ->
         st { uniqueMapping = Map.insert identifier tag (uniqueMapping st) }
       return (uniqueIdentifier identifier tag)
-
-
-uniqueTermFs :: Traversable t => t (UniqueState Term.Identifier -> Term) -> UniqueState Term.Identifier -> t Term
-uniqueTermFs terms =
-  State.evalState $
-    State.forM terms $ \term -> do
-      state <- State.get
-      let (uniqueState', uniqueState'') = splitState state
-      State.put uniqueState'
-      return $ term uniqueState''
 
 
 uniqueOperation :: Term.Operation (UniqueState Term.Identifier -> Term) -> UniqueState Term.Identifier -> Term.Operation Term
@@ -116,7 +116,7 @@ uniqueTermF termF uniqueState =
       in
         Term.Application
           (body uniqueState')
-          (uniqueTermFs args uniqueState'')
+          (splitting args uniqueState'')
 
     Term.TypeAbstraction args body ->
       Term.TypeAbstraction args (body uniqueState)
@@ -125,7 +125,7 @@ uniqueTermF termF uniqueState =
       Term.TypeApplication (body uniqueState) args
 
     Term.RecordIntroduction mapping ->
-      Term.RecordIntroduction (uniqueTermFs mapping uniqueState)
+      Term.RecordIntroduction (splitting mapping uniqueState)
 
     Term.RecordElimination body identifier ->
       Term.RecordElimination
