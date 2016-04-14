@@ -9,23 +9,28 @@ import Syntax.Type (Type)
 import qualified Syntax.Type as Type
 
 
-mostGeneralUnifier :: Type -> Type -> Maybe (Map Type.Identifier Type)
+data UnificationError =
+    ConstantUnificationError Type.Constant Type.Constant
+  | GenericUnificationError Type Type
+
+
+mostGeneralUnifier :: Type -> Type -> Either UnificationError (Map Type.Identifier Type)
 mostGeneralUnifier (Fix left) (Fix right) =
   case (left, right) of
 
     (Type.Variable leftVar, _) ->
-      Just (Map.singleton leftVar (Fix right))
+      Right (Map.singleton leftVar (Fix right))
 
     (_, Type.Variable rightVar) ->
-      Just (Map.singleton rightVar (Fix left))
+      Right (Map.singleton rightVar (Fix left))
 
     (Type.Constant leftConst, Type.Constant rightConst) ->
       if leftConst == rightConst
-        then Just Map.empty
-        else Nothing
+        then Right Map.empty
+        else Left (ConstantUnificationError leftConst rightConst)
 
     _ ->
-      Nothing
+      Left (GenericUnificationError (Fix left) (Fix right))
 
 
 substitute :: Type -> Map Type.Identifier Type -> Type

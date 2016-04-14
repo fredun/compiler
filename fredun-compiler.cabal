@@ -21,6 +21,7 @@ library
                        Syntax.Type,
                        Core.FreeVars,
                        Core.Unique,
+                       Core.Unification,
                        IR.Parser,
                        IR.DSL,
                        CodeGen.JavaScript
