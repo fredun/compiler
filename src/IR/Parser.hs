@@ -107,7 +107,7 @@ typeIdentifier =
 
 parseType :: Trifecta.Parser Type.Type
 parseType =
-  Trifecta.parens $ fmap (Type.Type . Fix) $
+  Trifecta.parens $ fmap Fix $
 
     Type.Variable
       <$ Trifecta.symbol "type-variable"

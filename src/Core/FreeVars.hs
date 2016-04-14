@@ -6,7 +6,7 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Map as Map
 
-import Syntax.Type (Type(..))
+import Syntax.Type (Type, TypeF)
 import qualified Syntax.Type as Type
 
 import Syntax.Term (Term(..))
@@ -128,7 +128,7 @@ freeTypeVars (Term mu) =
   Fix.cata freeTypeVarsF mu
 
 
-freeVarsTypeF :: Type.TypeF (Set Type.Identifier) -> Set Type.Identifier
+freeVarsTypeF :: TypeF (Set Type.Identifier) -> Set Type.Identifier
 freeVarsTypeF typeF =
   case typeF of
 
@@ -152,5 +152,5 @@ freeVarsTypeF typeF =
 
 
 freeVarsType :: Type -> Set Type.Identifier
-freeVarsType (Type mu) =
+freeVarsType mu =
   Fix.cata freeVarsTypeF mu

@@ -112,9 +112,9 @@ tests = testGroup "FreeVaes"
     [ testCase "retrieves none from a type constant" $ do
         let res =
               FreeVars.freeVarsType
-                ( Type.Type
-                  ( Fix
-                    ( Type.Constant Type.PrimitiveConstant )
+                ( Fix
+                  ( Type.Constant
+                    ( Type.PrimitiveConstant Type.StringPrimitive )
                   )
                 )
         res @?= Set.fromList []
@@ -122,11 +122,9 @@ tests = testGroup "FreeVaes"
     , testCase "retrieves one from a type variable" $ do
         let res =
               FreeVars.freeVarsType
-                ( Type.Type
-                  ( Fix
-                    ( Type.Variable
-                      ( Type.Identifier "foo" )
-                    )
+                ( Fix
+                  ( Type.Variable
+                    ( Type.Identifier "foo" )
                   )
                 )
         res @?= Set.fromList [Type.Identifier "foo"]
@@ -134,14 +132,12 @@ tests = testGroup "FreeVaes"
     , testCase "retrieves none when shadowed by an abstraction" $ do
         let res =
               FreeVars.freeVarsType
-                ( Type.Type
-                  ( Fix
-                    ( Type.Abstraction
-                      ( Type.Identifier "foo" )
-                      ( Fix
-                        ( Type.Variable
-                          ( Type.Identifier "foo" )
-                        )
+                ( Fix
+                  ( Type.Abstraction
+                    ( Type.Identifier "foo" )
+                    ( Fix
+                      ( Type.Variable
+                        ( Type.Identifier "foo" )
                       )
                     )
                   )
@@ -151,14 +147,12 @@ tests = testGroup "FreeVaes"
     , testCase "retrieves one when not shadowed by an abstraction" $ do
         let res =
               FreeVars.freeVarsType
-                ( Type.Type
-                  ( Fix
-                    ( Type.Abstraction
-                      ( Type.Identifier "foo" )
-                      ( Fix
-                        ( Type.Variable
-                          ( Type.Identifier "bar" )
-                        )
+                ( Fix
+                  ( Type.Abstraction
+                    ( Type.Identifier "foo" )
+                    ( Fix
+                      ( Type.Variable
+                        ( Type.Identifier "bar" )
                       )
                     )
                   )
@@ -168,18 +162,16 @@ tests = testGroup "FreeVaes"
     , testCase "retrieves two from an application" $ do
         let res =
               FreeVars.freeVarsType
-                ( Type.Type
-                  ( Fix
-                    ( Type.Application
-                      ( Fix
-                        ( Type.Variable
-                          ( Type.Identifier "foo" )
-                        )
+                ( Fix
+                  ( Type.Application
+                    ( Fix
+                      ( Type.Variable
+                        ( Type.Identifier "foo" )
                       )
-                      ( Fix
-                        ( Type.Variable
-                          ( Type.Identifier "bar" )
-                        )
+                    )
+                    ( Fix
+                      ( Type.Variable
+                        ( Type.Identifier "bar" )
                       )
                     )
                   )

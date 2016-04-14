@@ -63,8 +63,7 @@ instance Fix.OrdF TypeF where compareF = compare
 instance Fix.ShowF TypeF where showsPrecF = showsPrec
 
 
-newtype Type = Type (Mu TypeF)
-  deriving (Eq, Ord, Show, Typeable, Data)
+type Type = Mu TypeF
 
 
 kindOfConstant :: Constant -> Kind
