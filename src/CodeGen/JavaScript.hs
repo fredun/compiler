@@ -2,6 +2,9 @@ module CodeGen.JavaScript where
 
 import qualified Data.Generics.Fixplate as Fix
 
+import Data.Map (Map)
+import qualified Data.Map as Map
+
 import qualified Language.JavaScript.Parser.AST as JS
 import qualified Language.JavaScript.Pretty.Printer as JS
 
@@ -177,6 +180,18 @@ genOperation opn =
         _ -> JS.JSExpressionBinary left (genBinOp op) right
 
 
+genPropertyList :: Map String JS.JSExpression -> JS.JSObjectPropertyList
+genPropertyList mapping =
+  let
+    toProp (key, val) =
+      JS.JSPropertyNameandValue
+        (JS.JSPropertyString JS.JSNoAnnot key)
+        JS.JSNoAnnot
+        [val]
+  in
+    JS.JSCTLNone (genCommaList (map toProp (Map.toList mapping)))
+
+
 genTermF :: Term.TermF JS.JSExpression -> JS.JSExpression
 genTermF termF =
   case termF of
@@ -206,17 +221,23 @@ genTermF termF =
         (genCommaList rights)
         JS.JSNoAnnot
 
-    Term.TypeAbstraction _ _ ->
-      error "not implemented yet"
+    Term.TypeAbstraction _ body ->
+      body
 
-    Term.TypeApplication _ _ ->
-      error "not implemented yet"
+    Term.TypeApplication body _ ->
+      body
 
-    Term.RecordIntroduction _ ->
-      error "not implemented yet"
+    Term.RecordIntroduction mapping ->
+      JS.JSObjectLiteral
+        JS.JSNoAnnot
+        (genPropertyList mapping)
+        JS.JSNoAnnot
 
-    Term.RecordElimination _ _ ->
-      error "not implemented yet"
+    Term.RecordElimination body key ->
+      JS.JSCallExpressionDot
+        body
+        JS.JSNoAnnot
+        (genIdentifier key)
 
 
 genTermF' :: Term.TermF JS.JSExpression -> JS.JSExpression
