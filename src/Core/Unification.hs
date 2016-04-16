@@ -3,16 +3,14 @@ module Core.Unification where
 import Data.Generics.Fixplate (Mu(..))
 import qualified Data.Generics.Fixplate as Fix
 
-import Data.Map (Map)
 import qualified Data.Map as Map
-import Data.Set (Set)
 import qualified Data.Set as Set
 
-import Syntax.Type (Type, TypeF)
 import qualified Syntax.Type as Type
 
-
-type AnnotatedType = Fix.Attr TypeF (Set Type.Identifier)
+import Core.Annotation (AnnotatedType)
+import qualified Core.Annotation as Annotation
+import Core.Substitution (TypeSubstitution)
 
 
 data UnificationError =
@@ -22,8 +20,8 @@ data UnificationError =
   deriving (Eq, Ord, Show)
 
 
-mostGeneralUnifier :: AnnotatedType -> AnnotatedType -> Either UnificationError (Map Type.Identifier AnnotatedType)
-mostGeneralUnifier l@(Fix (Fix.Ann leftFree left)) r@(Fix (Fix.Ann rightFree right)) =
+mostGeneralUnifier :: AnnotatedType -> AnnotatedType -> Either UnificationError TypeSubstitution
+mostGeneralUnifier l@(Fix (Fix.Ann leftAnn left)) r@(Fix (Fix.Ann rightAnn right)) =
   case (left, right) of
 
     (Type.Variable leftVar, _) ->
@@ -31,7 +29,7 @@ mostGeneralUnifier l@(Fix (Fix.Ann leftFree left)) r@(Fix (Fix.Ann rightFree rig
       -- in the set of free variables on the right.
       -- If it does, then this is an attempt at
       -- constructing an infinite type and should fail.
-      if Set.member leftVar rightFree
+      if Set.member leftVar (Annotation.freeTypeVars rightAnn)
         then Left (OccursUnificationError l r)
         else Right (Map.singleton leftVar r)
 
@@ -40,7 +38,7 @@ mostGeneralUnifier l@(Fix (Fix.Ann leftFree left)) r@(Fix (Fix.Ann rightFree rig
       -- in the set of free variables on the left.
       -- If it does, then this is an attempt at
       -- constructing an infinite type and should fail.
-      if Set.member rightVar leftFree
+      if Set.member rightVar (Annotation.freeTypeVars leftAnn)
         then Left (OccursUnificationError l r)
         else Right (Map.singleton rightVar l)
 
@@ -53,27 +51,3 @@ mostGeneralUnifier l@(Fix (Fix.Ann leftFree left)) r@(Fix (Fix.Ann rightFree rig
 
     _ ->
       Left (GenericUnificationError l r)
-
-
-substitute :: Type -> Map Type.Identifier Type -> Type
-substitute (Fix typeF) subs =
-  case typeF of
-
-    Type.Constant c ->
-      Fix (Type.Constant c)
-
-    Type.Variable var ->
-      case Map.lookup var subs of
-        Just sub ->
-          substitute sub subs
-        Nothing ->
-          Fix typeF
-
-    Type.Abstraction arg kind body ->
-      let
-        bodySubs = Map.delete arg subs
-      in
-        Fix (Type.Abstraction arg kind (substitute body bodySubs))
-
-    Type.Application body arg ->
-      Fix (Type.Application (substitute body subs) (substitute arg subs))

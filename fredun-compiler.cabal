@@ -21,6 +21,8 @@ library
                        Syntax.Type,
                        Core.FreeVars,
                        Core.Unique,
+                       Core.Annotation,
+                       Core.Substitution,
                        Core.Unification,
                        IR.Parser,
                        IR.DSL,
