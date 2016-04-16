@@ -9,6 +9,7 @@ import qualified Language.JavaScript.Parser.AST as JS
 import qualified Language.JavaScript.Pretty.Printer as JS
 
 import qualified Syntax.Term as Term
+import Core.Unique (UniqueId(..))
 
 
 genBoolean :: Bool -> JS.JSExpression
@@ -130,17 +131,17 @@ genConstant constant =
       genNumeric n
 
 
-genIdentifier :: Term.Identifier -> JS.JSExpression
-genIdentifier (Term.Identifier identifier) =
-  JS.JSIdentifier JS.JSNoAnnot identifier
+genIdentifier :: UniqueId Term.Identifier -> JS.JSExpression
+genIdentifier (UniqueId tag (Term.Identifier identifier)) =
+  JS.JSIdentifier JS.JSNoAnnot (identifier ++ show tag)
 
 
-genIdent :: Term.Identifier -> JS.JSIdent
-genIdent (Term.Identifier identifier) =
-  JS.JSIdentName JS.JSNoAnnot identifier
+genIdent :: UniqueId Term.Identifier -> JS.JSIdent
+genIdent (UniqueId tag (Term.Identifier identifier)) =
+  JS.JSIdentName JS.JSNoAnnot (identifier ++ show tag)
 
 
-genArgs :: [Term.Identifier] -> JS.JSCommaList JS.JSIdent
+genArgs :: [UniqueId Term.Identifier] -> JS.JSCommaList JS.JSIdent
 genArgs list =
   genCommaList (map genIdent list)
 
@@ -192,7 +193,7 @@ genPropertyList mapping =
     JS.JSCTLNone (genCommaList (map toProp (Map.toList mapping)))
 
 
-genTermF :: Term.TermF JS.JSExpression -> JS.JSExpression
+genTermF :: Term.TermF typeId (UniqueId Term.Identifier) JS.JSExpression -> JS.JSExpression
 genTermF termF =
   case termF of
 
@@ -237,19 +238,19 @@ genTermF termF =
       JS.JSCallExpressionDot
         body
         JS.JSNoAnnot
-        (genIdentifier key)
+        (JS.JSIdentifier JS.JSNoAnnot key)
 
 
-genTermF' :: Term.TermF JS.JSExpression -> JS.JSExpression
+genTermF' :: Term.TermF typeId (UniqueId Term.Identifier) JS.JSExpression -> JS.JSExpression
 genTermF' termF =
   JS.JSExpressionParen JS.JSNoAnnot (genTermF termF) JS.JSNoAnnot
 
 
-genTerm :: Term.Term -> JS.JSExpression
+genTerm :: Term.Term typeId (UniqueId Term.Identifier) -> JS.JSExpression
 genTerm mu =
   Fix.cata genTermF' mu
 
 
-renderTerm :: Term.Term -> String
+renderTerm :: Term.Term typeId (UniqueId Term.Identifier) -> String
 renderTerm term =
   JS.renderToString (JS.JSAstExpression (genTerm term) JS.JSNoAnnot)

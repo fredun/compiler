@@ -48,23 +48,23 @@ data Operation t =
   deriving (Eq, Ord, Show, Functor, Foldable, Typeable, Data)
 
 
-data TermF t =
+data TermF typeId id t =
     Constant Constant
-  | Variable Identifier
-  | Abstraction [Identifier] t
+  | Variable id
+  | Abstraction [id] t
   | Application t [t]
-  | TypeAbstraction [(Type.Identifier, Type.Kind)] t
-  | TypeApplication t [Type]
+  | TypeAbstraction [(typeId, Type.Kind)] t
+  | TypeApplication t [Type typeId]
   | RecordIntroduction (Map String t)
-  | RecordElimination t Identifier
+  | RecordElimination t String
   | Operation (Operation t)
   deriving (Eq, Ord, Show, Functor, Foldable, Typeable, Data)
 
-deriving instance Data (Mu TermF)
+deriving instance (Data typeId, Data id) => Data (Mu (TermF typeId id))
 
-instance Fix.EqF TermF where equalF = (==)
-instance Fix.OrdF TermF where compareF = compare
-instance Fix.ShowF TermF where showsPrecF = showsPrec
+instance (Eq typeId, Eq id) => Fix.EqF (TermF typeId id) where equalF = (==)
+instance (Ord typeId, Ord id) => Fix.OrdF (TermF typeId id) where compareF = compare
+instance (Show typeId, Show id) => Fix.ShowF (TermF typeId id) where showsPrecF = showsPrec
 
 
-type Term = Mu TermF
+type Term typeId id = Mu (TermF typeId id)

@@ -13,7 +13,7 @@ import Syntax.Term (Term, TermF)
 import qualified Syntax.Term as Term
 
 
-freeVarsOp :: Ord a => Term.Operation (Set a) -> Set a
+freeVarsOp :: Ord id => Term.Operation (Set id) -> Set id
 freeVarsOp opn =
   case opn of
 
@@ -28,7 +28,7 @@ freeVarsOp opn =
       vars
 
 
-freeVarsF :: TermF (Set Term.Identifier) -> Set Term.Identifier
+freeVarsF :: Ord id => TermF typeId id (Set id) -> Set id
 freeVarsF termF =
   case termF of
 
@@ -73,12 +73,12 @@ freeVarsF termF =
       vars
 
 
-freeVars :: Term -> Set Term.Identifier
+freeVars :: Ord id => Term typeId id -> Set id
 freeVars mu =
   Fix.cata freeVarsF mu
 
 
-freeTypeVarsF :: TermF (Set Type.Identifier) -> Set Type.Identifier
+freeTypeVarsF :: Ord typeId => TermF typeId id (Set typeId) -> Set typeId
 freeTypeVarsF termF =
   case termF of
 
@@ -123,12 +123,12 @@ freeTypeVarsF termF =
       typeVars
 
 
-freeTypeVars :: Term -> Set Type.Identifier
+freeTypeVars :: Ord typeId => Term typeId id -> Set typeId
 freeTypeVars mu =
   Fix.cata freeTypeVarsF mu
 
 
-freeVarsTypeF :: TypeF (Set Type.Identifier) -> Set Type.Identifier
+freeVarsTypeF :: Ord typeId => TypeF typeId (Set typeId) -> Set typeId
 freeVarsTypeF typeF =
   case typeF of
 
@@ -151,11 +151,11 @@ freeVarsTypeF typeF =
       Set.union leftVars rightVars
 
 
-freeVarsType :: Type -> Set Type.Identifier
+freeVarsType :: Ord typeId => Type typeId -> Set typeId
 freeVarsType mu =
   Fix.cata freeVarsTypeF mu
 
 
-annotateFreeVarsType :: Type -> Fix.Attr TypeF (Set Type.Identifier)
+annotateFreeVarsType :: Ord typeId => Type typeId -> Fix.Attr (TypeF typeId) (Set typeId)
 annotateFreeVarsType mu =
   Fix.synthetise freeVarsTypeF mu

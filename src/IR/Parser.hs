@@ -48,6 +48,7 @@ numeric =
       <*> bitwidth
       <*> Trifecta.integer
 
+
 constant :: Trifecta.Parser Term.Constant
 constant =
   Trifecta.parens $
@@ -74,9 +75,11 @@ constant =
       <$ Trifecta.symbol "boolean"
       <*> boolean
 
+
 operator :: Trifecta.Parser Term.Operator
 operator =
   Term.Operator <$> Trifecta.stringLiteral
+
 
 operation :: Trifecta.Parser t -> Trifecta.Parser (Term.Operation t)
 operation inner =
@@ -95,6 +98,7 @@ operation inner =
       <*> operator
       <*> inner
 
+
 identifier :: Trifecta.Parser Term.Identifier
 identifier =
   Term.Identifier <$> Trifecta.stringLiteral
@@ -105,7 +109,7 @@ typeIdentifier =
   Type.Identifier <$> Trifecta.stringLiteral
 
 
-parseType :: Trifecta.Parser Type.Type
+parseType :: Trifecta.Parser (Type.Type Type.Identifier)
 parseType =
   Trifecta.parens $ fmap Fix $
 
@@ -134,7 +138,7 @@ typeArgument =
   (,) <$> typeIdentifier <*> kind
 
 
-termF :: Trifecta.Parser t -> Trifecta.Parser (Term.TermF t)
+termF :: Trifecta.Parser t -> Trifecta.Parser (Term.TermF Type.Identifier Term.Identifier t)
 termF inner =
   Trifecta.parens $
 
@@ -183,6 +187,6 @@ termF inner =
       <*> operation inner
 
 
-term :: Trifecta.Parser Term.Term
+term :: Trifecta.Parser (Term.Term Type.Identifier Term.Identifier)
 term =
   Fix <$> termF term

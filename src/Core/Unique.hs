@@ -2,136 +2,112 @@ module Core.Unique where
 
 import Control.Concurrent.Supply (Supply)
 import qualified Control.Concurrent.Supply as Supply
-import Control.Monad.State (State)
+import Control.Monad (forM)
+import Control.Monad.State (StateT)
 import qualified Control.Monad.State as State
 
 import Data.Generics.Fixplate (Mu(..))
-import qualified Data.Generics.Fixplate as Fix
 import Data.Map (Map)
 import qualified Data.Map as Map
 
-import Syntax.Term (Term, TermF)
+import Syntax.Term (Term)
 import qualified Syntax.Term as Term
 
 
-data UniqueState identifier =
-  UniqueState
-    { uniqueSupply :: Supply
-    , uniqueMapping :: Map identifier Int
-    }
+data UniqueId id = UniqueId Int id
 
 
-newState :: IO (UniqueState id)
-newState = do
-  supply <- Supply.newSupply
-  return (UniqueState supply Map.empty)
+newtype UniqueT m a = Unique (StateT Supply m a)
+  deriving (Functor, Applicative, Monad)
 
 
-splitState :: UniqueState id -> (UniqueState id, UniqueState id)
-splitState (UniqueState supply mapping) =
-  let (supply', supply'') = Supply.splitSupply supply
-  in (UniqueState supply' mapping, UniqueState supply'' mapping)
+newSupply :: IO Supply
+newSupply =
+  Supply.newSupply
 
 
-splitting :: Traversable t => t (UniqueState id -> a) -> UniqueState id -> t a
-splitting fs =
-  State.evalState $
-    State.forM fs $ \f -> do
-      state <- State.get
-      let (uniqueState', uniqueState'') = splitState state
-      State.put uniqueState'
-      return $ f uniqueState''
+runUnique :: UniqueT m a -> Supply -> m (a, Supply)
+runUnique (Unique state) =
+  State.runStateT state
 
 
-uniqueIdentifier :: Term.Identifier -> Int -> Term.Identifier
-uniqueIdentifier (Term.Identifier s) tag =
-  Term.Identifier (s ++ "_" ++ show tag)
+runUniqueIO :: UniqueT IO a -> IO a
+runUniqueIO m = do
+  supply <- newSupply
+  fst <$> runUnique m supply
 
 
-freshTag :: State (UniqueState id) Int
-freshTag = do
-  st <- State.get
-  let (tag, supply) = Supply.freshId (uniqueSupply st)
-  State.put (st { uniqueSupply = supply })
-  return tag
+unique :: Monad m => id -> UniqueT m (UniqueId id)
+unique identifier = Unique $ do
+  supply <- State.get
+  let (tag, supply') = Supply.freshId supply
+  State.put supply'
+  return (UniqueId tag identifier)
 
 
-freshIdentifiers :: [Term.Identifier] -> UniqueState Term.Identifier -> ([Term.Identifier], UniqueState Term.Identifier)
-freshIdentifiers ids uniqueState =
-  flip State.runState uniqueState $
-    State.forM ids $ \identifier -> do
-      tag <- freshTag
-      State.modify $ \st ->
-        st { uniqueMapping = Map.insert identifier tag (uniqueMapping st) }
-      return (uniqueIdentifier identifier tag)
-
-
-uniqueOperation :: Term.Operation (UniqueState Term.Identifier -> Term) -> UniqueState Term.Identifier -> Term.Operation Term
-uniqueOperation opn uniqueState =
+uniqueOperation :: (Ord id, Monad m) =>
+  Map id (UniqueId id) ->
+  Term.Operation (Term typeId id) ->
+  UniqueT m (Term.Operation (Term typeId (UniqueId id)))
+uniqueOperation mapping opn =
   case opn of
 
     Term.BinaryOperation op left right ->
-      let
-        (uniqueState', uniqueState'') =
-          splitState uniqueState
-      in
-        Term.BinaryOperation op
-          (left uniqueState')
-          (right uniqueState'')
+      Term.BinaryOperation op
+        <$> uniqueTerm mapping left
+        <*> uniqueTerm mapping right
 
     Term.UnaryOperation op arg ->
       Term.UnaryOperation op
-        (arg uniqueState)
+        <$> uniqueTerm mapping arg
 
 
-uniqueTermF :: TermF (UniqueState Term.Identifier -> Term) -> UniqueState Term.Identifier -> Term
-uniqueTermF termF uniqueState =
-  Fix $ case termF of
+uniqueTerm :: (Ord id, Monad m) =>
+  Map id (UniqueId id) ->
+  Term typeId id ->
+  UniqueT m (Term typeId (UniqueId id))
+uniqueTerm mapping (Fix termF) =
+  Fix <$> case termF of
 
     Term.Constant c ->
-      Term.Constant c
+      pure $ Term.Constant c
 
-    Term.Variable v ->
-      case Map.lookup v (uniqueMapping uniqueState) of
+    Term.Variable identifier ->
+      case Map.lookup identifier mapping of
         Nothing ->
-          Term.Variable v
-        Just tag ->
-          Term.Variable (uniqueIdentifier v tag)
+          Term.Variable <$> unique identifier
+        Just uniqueIdentifier ->
+          pure $ Term.Variable uniqueIdentifier
 
     Term.Operation opn ->
-      Term.Operation (uniqueOperation opn uniqueState)
+      Term.Operation
+        <$> uniqueOperation mapping opn
 
-    Term.Abstraction args body ->
-      let
-        (args', uniqueState') =
-          freshIdentifiers args uniqueState
-      in
-        Term.Abstraction args'
-          (body uniqueState')
+    Term.Abstraction args body -> do
+      args' <- forM args unique
+      let mapping' = Map.unionWith (\_ x -> x) mapping (Map.fromList (zip args args'))
+      Term.Abstraction args'
+        <$> uniqueTerm mapping' body
 
     Term.Application body args ->
-      let
-        (uniqueState', uniqueState'') =
-          splitState uniqueState
-      in
-        Term.Application
-          (body uniqueState')
-          (splitting args uniqueState'')
+      Term.Application
+        <$> uniqueTerm mapping body
+        <*> forM args (uniqueTerm mapping)
 
     Term.TypeAbstraction args body ->
-      Term.TypeAbstraction args (body uniqueState)
+      Term.TypeAbstraction args
+        <$> uniqueTerm mapping body
 
     Term.TypeApplication body args ->
-      Term.TypeApplication (body uniqueState) args
+      Term.TypeApplication
+        <$> uniqueTerm mapping body
+        <*> pure args
 
-    Term.RecordIntroduction mapping ->
-      Term.RecordIntroduction (splitting mapping uniqueState)
+    Term.RecordIntroduction recordMapping ->
+      Term.RecordIntroduction
+        <$> forM recordMapping (uniqueTerm mapping)
 
     Term.RecordElimination body identifier ->
       Term.RecordElimination
-        (body uniqueState)
-        identifier
-
-uniqueTerm :: Term -> UniqueState Term.Identifier -> Term
-uniqueTerm mu =
-  Fix.cata uniqueTermF mu
+        <$> uniqueTerm mapping body
+        <*> pure identifier

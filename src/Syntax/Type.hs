@@ -49,21 +49,21 @@ data Kind =
   deriving (Eq, Ord, Show, Typeable, Data)
 
 
-data TypeF t =
+data TypeF id t =
     Constant Constant
-  | Variable Identifier
-  | Abstraction Identifier Kind t
+  | Variable id
+  | Abstraction id Kind t
   | Application t t
   deriving (Eq, Ord, Show, Functor, Foldable, Typeable, Data)
 
-deriving instance Data (Mu TypeF)
+deriving instance Data id => Data (Mu (TypeF id))
 
-instance Fix.EqF TypeF where equalF = (==)
-instance Fix.OrdF TypeF where compareF = compare
-instance Fix.ShowF TypeF where showsPrecF = showsPrec
+instance Eq id => Fix.EqF (TypeF id) where equalF = (==)
+instance Ord id => Fix.OrdF (TypeF id) where compareF = compare
+instance Show id => Fix.ShowF (TypeF id) where showsPrecF = showsPrec
 
 
-type Type = Mu TypeF
+type Type id = Mu (TypeF id)
 
 
 kindOfConstant :: Constant -> Kind

@@ -21,45 +21,45 @@ tests = testGroup "FreeVaes"
   [ testGroup "freeVars"
 
     [ testCase "retrieves none from a constant" $ do
-        let res = FreeVars.freeVars [termDSL|
+        let res = FreeVars.freeVars ([termDSL|
           (constant (numeric (integer 32 -1)))
-        |]
+        |] :: Term.Term Type.Identifier Term.Identifier)
         res @?= Set.fromList []
 
     , testCase "retrieves one from a variable" $ do
-        let res = FreeVars.freeVars [termDSL|
+        let res = FreeVars.freeVars ([termDSL|
           (variable "foo")
-        |]
+        |] :: Term.Term Type.Identifier Term.Identifier)
         res @?= Set.fromList [Term.Identifier "foo"]
 
     , testCase "retrieves none when shadowed by an abstraction" $ do
-        let res = FreeVars.freeVars [termDSL|
+        let res = FreeVars.freeVars ([termDSL|
           (abstraction "foo" (variable "foo"))
-        |]
+        |] :: Term.Term Type.Identifier Term.Identifier)
         res @?= Set.fromList []
 
     , testCase "retrieves one when not shadowed by an abstraction" $ do
-        let res = FreeVars.freeVars [termDSL|
+        let res = FreeVars.freeVars ([termDSL|
           (abstraction "foo" (variable "bar"))
-        |]
+        |] :: Term.Term Type.Identifier Term.Identifier)
         res @?= Set.fromList [Term.Identifier "bar"]
 
     , testCase "retrieves two from an application" $ do
-        let res = FreeVars.freeVars [termDSL|
+        let res = FreeVars.freeVars ([termDSL|
           (application (variable "foo") (variable "bar"))
-        |]
+        |] :: Term.Term Type.Identifier Term.Identifier)
         res @?= Set.fromList [Term.Identifier "foo", Term.Identifier "bar"]
 
     , testCase "retrieves one from a type abstraction" $ do
-        let res = FreeVars.freeVars [termDSL|
+        let res = FreeVars.freeVars ([termDSL|
           (type-abstraction "foo" (type) (variable "bar"))
-        |]
+        |] :: Term.Term Type.Identifier Term.Identifier)
         res @?= Set.fromList [Term.Identifier "bar"]
 
     , testCase "retrieves one from a type application" $ do
-        let res = FreeVars.freeVars [termDSL|
+        let res = FreeVars.freeVars ([termDSL|
           (type-application (variable "bar") (type-variable "foo"))
-        |]
+        |] :: Term.Term Type.Identifier Term.Identifier)
         res @?= Set.fromList [Term.Identifier "bar"]
 
     , testCase "retrieves many from a record introduction" $ do
@@ -96,7 +96,7 @@ tests = testGroup "FreeVaes"
                         ( Term.Identifier "bar" )
                       )
                     )
-                    ( Term.Identifier "foo" )
+                    "foo"
                   )
                 )
         res @?= Set.fromList [Term.Identifier "bar"]
@@ -112,6 +112,7 @@ tests = testGroup "FreeVaes"
                   ( Type.Constant
                     ( Type.PrimitiveConstant Type.StringPrimitive )
                   )
+                  :: Type.Type Type.Identifier
                 )
         res @?= Set.fromList []
 
@@ -122,6 +123,7 @@ tests = testGroup "FreeVaes"
                   ( Type.Variable
                     ( Type.Identifier "foo" )
                   )
+                  :: Type.Type Type.Identifier
                 )
         res @?= Set.fromList [Type.Identifier "foo"]
 
@@ -138,6 +140,7 @@ tests = testGroup "FreeVaes"
                       )
                     )
                   )
+                  :: Type.Type Type.Identifier
                 )
         res @?= Set.fromList []
 
@@ -154,6 +157,7 @@ tests = testGroup "FreeVaes"
                       )
                     )
                   )
+                  :: Type.Type Type.Identifier
                 )
         res @?= Set.fromList [Type.Identifier "bar"]
 
@@ -173,6 +177,7 @@ tests = testGroup "FreeVaes"
                       )
                     )
                   )
+                  :: Type.Type Type.Identifier
                 )
         res @?= Set.fromList [Type.Identifier "foo", Type.Identifier "bar"]
 
