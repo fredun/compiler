@@ -47,11 +47,11 @@ substitute (Fix typeF) subs =
         Nothing ->
           Fix typeF
 
-    Type.Abstraction arg body ->
+    Type.Abstraction arg kind body ->
       let
         bodySubs = Map.delete arg subs
       in
-        Fix (Type.Abstraction arg (substitute body bodySubs))
+        Fix (Type.Abstraction arg kind (substitute body bodySubs))
 
     Type.Application body arg ->
       Fix (Type.Application (substitute body subs) (substitute arg subs))

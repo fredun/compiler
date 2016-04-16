@@ -53,7 +53,7 @@ data TermF t =
   | Variable Identifier
   | Abstraction [Identifier] t
   | Application t [t]
-  | TypeAbstraction [Type.Identifier] t
+  | TypeAbstraction [(Type.Identifier, Type.Kind)] t
   | TypeApplication t [Type]
   | RecordIntroduction (Map String t)
   | RecordElimination t Identifier

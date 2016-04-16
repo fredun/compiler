@@ -52,7 +52,7 @@ tests = testGroup "FreeVaes"
 
     , testCase "retrieves one from a type abstraction" $ do
         let res = FreeVars.freeVars [termDSL|
-          (type-abstraction "foo" (variable "bar"))
+          (type-abstraction "foo" (type) (variable "bar"))
         |]
         res @?= Set.fromList [Term.Identifier "bar"]
 
@@ -131,6 +131,7 @@ tests = testGroup "FreeVaes"
                 ( Fix
                   ( Type.Abstraction
                     ( Type.Identifier "foo" )
+                    Type.KindOfTypes
                     ( Fix
                       ( Type.Variable
                         ( Type.Identifier "foo" )
@@ -146,6 +147,7 @@ tests = testGroup "FreeVaes"
                 ( Fix
                   ( Type.Abstraction
                     ( Type.Identifier "foo" )
+                    Type.KindOfTypes
                     ( Fix
                       ( Type.Variable
                         ( Type.Identifier "bar" )

@@ -114,6 +114,26 @@ parseType =
       <*> typeIdentifier
 
 
+kind :: Trifecta.Parser Type.Kind
+kind =
+  Trifecta.parens $
+
+    Type.KindOfTypeConstructors
+      <$ Trifecta.symbol "type-constructor"
+      <*> kind
+      <*> kind
+
+    <|>
+
+    Type.KindOfTypes
+      <$ Trifecta.symbol "type"
+
+
+typeArgument :: Trifecta.Parser (Type.Identifier, Type.Kind)
+typeArgument =
+  (,) <$> typeIdentifier <*> kind
+
+
 termF :: Trifecta.Parser t -> Trifecta.Parser (Term.TermF t)
 termF inner =
   Trifecta.parens $
@@ -146,7 +166,7 @@ termF inner =
 
     Term.TypeAbstraction
       <$ Trifecta.symbol "type-abstraction"
-      <*> Trifecta.many typeIdentifier
+      <*> Trifecta.many typeArgument
       <*> inner
 
     <|>

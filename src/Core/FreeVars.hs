@@ -106,7 +106,7 @@ freeTypeVarsF termF =
     -- A type abstraction creates a binding for a type variable,
     -- and thus eliminates a free type variable from its body.
     Term.TypeAbstraction argTypeVars typeVars ->
-      Set.difference typeVars (Set.fromList argTypeVars)
+      Set.difference typeVars (Set.fromList (map fst argTypeVars))
 
     -- A type application consists of a term and a type, both of which
     -- can have free type variables.
@@ -142,7 +142,7 @@ freeVarsTypeF typeF =
 
     -- An abstraction creates a binding for a type variable,
     -- and thus eliminates a free type variable from its body.
-    Type.Abstraction var vars ->
+    Type.Abstraction var _ vars ->
       Set.delete var vars
 
     -- An application consists of two types, both of which

@@ -52,7 +52,7 @@ data Kind =
 data TypeF t =
     Constant Constant
   | Variable Identifier
-  | Abstraction Identifier t
+  | Abstraction Identifier Kind t
   | Application t t
   deriving (Eq, Ord, Show, Functor, Foldable, Typeable, Data)
 
