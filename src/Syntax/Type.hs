@@ -64,33 +64,3 @@ instance Show id => Fix.ShowF (TypeF id) where showsPrecF = showsPrec
 
 
 type Type id = Mu (TypeF id)
-
-
-kindOfConstant :: Constant -> Kind
-kindOfConstant constant = case constant of
-
-  -- Primitives (String, Int, etc.) have kind *.
-  PrimitiveConstant _ ->
-    KindOfTypes
-
-  -- The function constructor has kind (* -> (* -> *)).
-  -- It is a type constructor with two arguments
-  -- which gets applied to both the codomain and the domain
-  FunctionConstant ->
-    KindOfTypeConstructors KindOfTypes (KindOfTypeConstructors KindOfTypes KindOfTypes)
-
-  -- The forall(k) constructor has kind ((k -> *) -> *).
-  -- It is a type constructor parameterised by a kind, that can be applied
-  -- to a type lambda.
-  ForAllConstant kind ->
-    KindOfTypeConstructors (KindOfTypeConstructors kind KindOfTypes) KindOfTypes
-
-  -- The exists(k) constructor has kind ((k -> *) -> *).
-  -- It is a type constructor parameterised by a kind, that can be applied
-  -- to a type lambda.
-  ExistsConstant kind ->
-    KindOfTypeConstructors (KindOfTypeConstructors kind KindOfTypes) KindOfTypes
-
-  -- Records have kind *.
-  RecordConstant _ ->
-    KindOfTypes
