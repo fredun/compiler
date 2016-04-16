@@ -154,3 +154,8 @@ freeVarsTypeF typeF =
 freeVarsType :: Type -> Set Type.Identifier
 freeVarsType mu =
   Fix.cata freeVarsTypeF mu
+
+
+annotateFreeVarsType :: Type -> Fix.Attr TypeF (Set Type.Identifier)
+annotateFreeVarsType mu =
+  Fix.synthetise freeVarsTypeF mu

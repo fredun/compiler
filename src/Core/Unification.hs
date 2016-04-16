@@ -1,36 +1,58 @@
 module Core.Unification where
 
 import Data.Generics.Fixplate (Mu(..))
+import qualified Data.Generics.Fixplate as Fix
 
 import Data.Map (Map)
 import qualified Data.Map as Map
+import Data.Set (Set)
+import qualified Data.Set as Set
 
-import Syntax.Type (Type)
+import Syntax.Type (Type, TypeF)
 import qualified Syntax.Type as Type
+
+
+type AnnotatedType = Fix.Attr TypeF (Set Type.Identifier)
 
 
 data UnificationError =
     ConstantUnificationError Type.Constant Type.Constant
-  | GenericUnificationError Type Type
+  | ContainsUnificationError AnnotatedType AnnotatedType
+  | GenericUnificationError AnnotatedType AnnotatedType
+  deriving (Eq, Ord, Show)
 
 
-mostGeneralUnifier :: Type -> Type -> Either UnificationError (Map Type.Identifier Type)
-mostGeneralUnifier (Fix left) (Fix right) =
+mostGeneralUnifier :: AnnotatedType -> AnnotatedType -> Either UnificationError (Map Type.Identifier AnnotatedType)
+mostGeneralUnifier l@(Fix (Fix.Ann leftFree left)) r@(Fix (Fix.Ann rightFree right)) =
   case (left, right) of
 
     (Type.Variable leftVar, _) ->
-      Right (Map.singleton leftVar (Fix right))
+      -- Check whether the set of free variables
+      -- on the right contains the type variable.
+      -- If it does, then this is an attempt at
+      -- constructing an infinite type and should fail.
+      if Set.member leftVar rightFree
+        then Left (ContainsUnificationError l r)
+        else Right (Map.singleton leftVar r)
 
     (_, Type.Variable rightVar) ->
-      Right (Map.singleton rightVar (Fix left))
+      -- Check whether the set of free variables
+      -- on the left contains the type variable.
+      -- If it does, then this is an attempt at
+      -- constructing an infinite type and should fail.
+      if Set.member rightVar leftFree
+        then Left (ContainsUnificationError l r)
+        else Right (Map.singleton rightVar l)
 
     (Type.Constant leftConst, Type.Constant rightConst) ->
+      -- Check whether the constants on both sides are equal.
+      -- If they're not, it is a unification error.
       if leftConst == rightConst
         then Right Map.empty
         else Left (ConstantUnificationError leftConst rightConst)
 
     _ ->
-      Left (GenericUnificationError (Fix left) (Fix right))
+      Left (GenericUnificationError l r)
 
 
 substitute :: Type -> Map Type.Identifier Type -> Type

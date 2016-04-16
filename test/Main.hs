@@ -6,6 +6,7 @@ import Test.Tasty.Runners (consoleTestReporter)
 import Test.Tasty.Runners.AntXML
 
 import qualified Core.FreeVarsSpec
+import qualified Core.UnificationSpec
 
 
 main :: IO ()
@@ -16,5 +17,6 @@ tests :: TestTree
 tests = testGroup "tests"
   [ testGroup "Core"
     [ Core.FreeVarsSpec.tests
+    , Core.UnificationSpec.tests
     ]
   ]
