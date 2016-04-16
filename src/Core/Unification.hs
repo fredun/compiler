@@ -17,7 +17,7 @@ type AnnotatedType = Fix.Attr TypeF (Set Type.Identifier)
 
 data UnificationError =
     ConstantUnificationError Type.Constant Type.Constant
-  | ContainsUnificationError AnnotatedType AnnotatedType
+  | OccursUnificationError AnnotatedType AnnotatedType
   | GenericUnificationError AnnotatedType AnnotatedType
   deriving (Eq, Ord, Show)
 
@@ -27,21 +27,21 @@ mostGeneralUnifier l@(Fix (Fix.Ann leftFree left)) r@(Fix (Fix.Ann rightFree rig
   case (left, right) of
 
     (Type.Variable leftVar, _) ->
-      -- Check whether the set of free variables
-      -- on the right contains the type variable.
+      -- Check whether the type variable occurs
+      -- in the set of free variables on the right.
       -- If it does, then this is an attempt at
       -- constructing an infinite type and should fail.
       if Set.member leftVar rightFree
-        then Left (ContainsUnificationError l r)
+        then Left (OccursUnificationError l r)
         else Right (Map.singleton leftVar r)
 
     (_, Type.Variable rightVar) ->
-      -- Check whether the set of free variables
-      -- on the left contains the type variable.
+      -- Check whether the type variable occurs
+      -- in the set of free variables on the left.
       -- If it does, then this is an attempt at
       -- constructing an infinite type and should fail.
       if Set.member rightVar leftFree
-        then Left (ContainsUnificationError l r)
+        then Left (OccursUnificationError l r)
         else Right (Map.singleton rightVar l)
 
     (Type.Constant leftConst, Type.Constant rightConst) ->
