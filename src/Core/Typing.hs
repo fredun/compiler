@@ -34,13 +34,13 @@ data Result typeId id = Result
 instance (Ord typeId, Ord id) => Monoid (Result typeId id) where
   mempty =
     Result
-      { constraints = mempty
-      , assumptions = mempty
+      { constraints = Set.empty
+      , assumptions = Map.empty
       }
   mappend a b =
     Result
-      { constraints = constraints a `mappend` constraints b
-      , assumptions = assumptions a `mappend` assumptions b
+      { constraints = Set.union (constraints a) (constraints b)
+      , assumptions = Map.unionWith Set.union (assumptions a) (assumptions b)
       }
 
 
