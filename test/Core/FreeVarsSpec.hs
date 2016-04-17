@@ -52,13 +52,7 @@ tests = testGroup "FreeVaes"
 
     , testCase "retrieves one from a type abstraction" $ do
         let res = FreeVars.freeVars ([termDSL|
-          (type-abstraction "foo" (type) (variable "bar"))
-        |] :: Term.Term Type.Identifier Term.Identifier)
-        res @?= Set.fromList [Term.Identifier "bar"]
-
-    , testCase "retrieves one from a type application" $ do
-        let res = FreeVars.freeVars ([termDSL|
-          (type-application (variable "bar") (type-variable "foo"))
+          (type-forall "foo" (type) (variable "bar"))
         |] :: Term.Term Type.Identifier Term.Identifier)
         res @?= Set.fromList [Term.Identifier "bar"]
 

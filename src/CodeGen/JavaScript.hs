@@ -222,10 +222,7 @@ genTermF termF =
         (genCommaList rights)
         JS.JSNoAnnot
 
-    Term.TypeAbstraction _ body ->
-      body
-
-    Term.TypeApplication body _ ->
+    Term.TypeForAll _ _ body ->
       body
 
     Term.RecordIntroduction mapping ->

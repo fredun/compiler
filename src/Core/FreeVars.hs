@@ -56,11 +56,7 @@ freeVarsF termF =
       Set.union leftVars (Set.unions rightVars)
 
     -- A type abstration has a body that might contain free variables.
-    Term.TypeAbstraction _ vars ->
-      vars
-
-    -- A type application has a body that might contain free variables.
-    Term.TypeApplication vars _ ->
+    Term.TypeForAll _ _ vars ->
       vars
 
     -- A record introduction has a term per record field, all of which
@@ -105,13 +101,8 @@ freeTypeVarsF termF =
 
     -- A type abstraction creates a binding for a type variable,
     -- and thus eliminates a free type variable from its body.
-    Term.TypeAbstraction argTypeVars typeVars ->
-      Set.difference typeVars (Set.fromList (map fst argTypeVars))
-
-    -- A type application consists of a term and a type, both of which
-    -- can have free type variables.
-    Term.TypeApplication typeVars types ->
-      Set.union typeVars (Set.unions (map freeVarsType types))
+    Term.TypeForAll typeVar _ typeVars ->
+      Set.delete typeVar typeVars
 
     -- A record introduction has a term per record field, all of which
     -- might contain free type variables.

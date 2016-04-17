@@ -95,14 +95,9 @@ uniqueTerm mapping (Fix termF) =
         <$> uniqueTerm mapping body
         <*> forM args (uniqueTerm mapping)
 
-    Term.TypeAbstraction args body ->
-      Term.TypeAbstraction args
+    Term.TypeForAll arg kind body ->
+      Term.TypeForAll arg kind
         <$> uniqueTerm mapping body
-
-    Term.TypeApplication body args ->
-      Term.TypeApplication
-        <$> uniqueTerm mapping body
-        <*> pure args
 
     Term.RecordIntroduction recordMapping ->
       Term.RecordIntroduction

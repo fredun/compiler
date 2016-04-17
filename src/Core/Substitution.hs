@@ -100,11 +100,8 @@ substituteTerm subs (Fix (Fix.Ann ann termF)) =
         in
           Fix (Fix.Ann newAnn (Term.Application newBody newArgs))
 
-      Term.TypeAbstraction args body ->
-        Fix (Fix.Ann newAnn (Term.TypeAbstraction args (substituteTerm subs body)))
-
-      Term.TypeApplication body args ->
-        Fix (Fix.Ann newAnn (Term.TypeApplication (substituteTerm subs body) args))
+      Term.TypeForAll arg kind body ->
+        Fix (Fix.Ann newAnn (Term.TypeForAll arg kind (substituteTerm subs body)))
 
       Term.RecordIntroduction mapping ->
         Fix (Fix.Ann newAnn (Term.RecordIntroduction (fmap (substituteTerm subs) mapping)))

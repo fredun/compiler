@@ -53,8 +53,7 @@ data TermF typeId id t =
   | Variable id
   | Abstraction [id] t
   | Application t [t]
-  | TypeAbstraction [(typeId, Type.Kind)] t
-  | TypeApplication t [Type typeId]
+  | TypeForAll typeId Type.Kind t
   | RecordIntroduction (Map String t)
   | RecordElimination t String
   | Operation (Operation t)

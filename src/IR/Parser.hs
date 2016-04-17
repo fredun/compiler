@@ -133,11 +133,6 @@ kind =
       <$ Trifecta.symbol "type"
 
 
-typeArgument :: Trifecta.Parser (Type.Identifier, Type.Kind)
-typeArgument =
-  (,) <$> typeIdentifier <*> kind
-
-
 termF :: Trifecta.Parser t -> Trifecta.Parser (Term.TermF Type.Identifier Term.Identifier t)
 termF inner =
   Trifecta.parens $
@@ -168,17 +163,11 @@ termF inner =
 
     <|>
 
-    Term.TypeAbstraction
-      <$ Trifecta.symbol "type-abstraction"
-      <*> Trifecta.many typeArgument
+    Term.TypeForAll
+      <$ Trifecta.symbol "type-forall"
+      <*> typeIdentifier
+      <*> kind
       <*> inner
-
-    <|>
-
-    Term.TypeApplication
-      <$ Trifecta.symbol "type-application"
-      <*> inner
-      <*> Trifecta.many parseType
 
     <|>
 
