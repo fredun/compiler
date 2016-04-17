@@ -51,14 +51,20 @@ substituteType subs (Fix (Fix.Ann ann typeF)) =
           Nothing ->
             Fix (Fix.Ann newAnn (Type.Variable var))
 
-      Type.Abstraction arg kind body ->
+      Type.Function args body ->
+        let
+          newArgs =
+            map (substituteType subs) args
+          newBody =
+            substituteType subs body
+        in
+          Fix (Fix.Ann newAnn (Type.Function newArgs newBody))
+
+      Type.ForAll arg kind body ->
         let
           bodySubs = Map.delete arg subs
         in
-          Fix (Fix.Ann newAnn (Type.Abstraction arg kind (substituteType bodySubs body)))
-
-      Type.Application body arg ->
-        Fix (Fix.Ann newAnn (Type.Application (substituteType subs body) (substituteType subs arg)))
+          Fix (Fix.Ann newAnn (Type.ForAll arg kind (substituteType bodySubs body)))
 
 
 substituteTerm :: Ord id => Substitution (TermF typeId) id -> Annotated (TermF typeId) id -> Annotated (TermF typeId) id

@@ -131,7 +131,7 @@ tests = testGroup "FreeVaes"
         let res =
               FreeVars.freeVarsType
                 ( Fix
-                  ( Type.Abstraction
+                  ( Type.ForAll
                     ( Type.Identifier "foo" )
                     Type.KindOfTypes
                     ( Fix
@@ -148,7 +148,7 @@ tests = testGroup "FreeVaes"
         let res =
               FreeVars.freeVarsType
                 ( Fix
-                  ( Type.Abstraction
+                  ( Type.ForAll
                     ( Type.Identifier "foo" )
                     Type.KindOfTypes
                     ( Fix
@@ -161,16 +161,16 @@ tests = testGroup "FreeVaes"
                 )
         res @?= Set.fromList [Type.Identifier "bar"]
 
-    , testCase "retrieves two from an application" $ do
+    , testCase "retrieves two from a function" $ do
         let res =
               FreeVars.freeVarsType
                 ( Fix
-                  ( Type.Application
-                    ( Fix
+                  ( Type.Function
+                    [ Fix
                       ( Type.Variable
                         ( Type.Identifier "foo" )
                       )
-                    )
+                    ]
                     ( Fix
                       ( Type.Variable
                         ( Type.Identifier "bar" )

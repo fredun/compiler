@@ -140,15 +140,16 @@ freeVarsTypeF typeF =
     Type.Variable var ->
       Set.singleton var
 
-    -- An abstraction creates a binding for a type variable,
-    -- and thus eliminates a free type variable from its body.
-    Type.Abstraction var _ vars ->
-      Set.delete var vars
+    -- An function consists of multiple types, both in its
+    -- arguments and in its body, all of which can have free
+    -- type variables.
+    Type.Function args body ->
+      Set.union (Set.unions args) body
 
-    -- An application consists of two types, both of which
-    -- can have free type variables.
-    Type.Application leftVars rightVars ->
-      Set.union leftVars rightVars
+    -- A universal quantification creates a binding for a type variable,
+    -- and thus eliminates a free type variable from its body.
+    Type.ForAll var _ vars ->
+      Set.delete var vars
 
 
 freeVarsType :: Ord typeId => Type typeId -> Set typeId

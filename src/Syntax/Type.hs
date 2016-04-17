@@ -36,9 +36,6 @@ data Primitive =
 
 data Constant =
     PrimitiveConstant Primitive
-  | FunctionConstant
-  | ForAllConstant Kind
-  | ExistsConstant Kind
   | RecordConstant (Set Identifier)
   deriving (Eq, Ord, Show, Typeable, Data)
 
@@ -52,8 +49,8 @@ data Kind =
 data TypeF id t =
     Constant Constant
   | Variable id
-  | Abstraction id Kind t
-  | Application t t
+  | Function [t] t
+  | ForAll id Kind t
   deriving (Eq, Ord, Show, Functor, Foldable, Typeable, Data)
 
 deriving instance Data id => Data (Mu (TypeF id))

@@ -15,6 +15,7 @@ import qualified Syntax.Term as Term
 
 
 data UniqueId id = UniqueId Int id
+  deriving (Eq, Ord, Show)
 
 
 newtype UniqueT m a = Unique (StateT Supply m a)
