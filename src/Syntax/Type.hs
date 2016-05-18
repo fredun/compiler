@@ -50,7 +50,6 @@ data TypeF id t =
     Constant Constant
   | Variable id
   | Function [t] t
-  | ForAll id Kind t
   deriving (Eq, Ord, Show, Functor, Foldable, Typeable, Data)
 
 deriving instance Data id => Data (Mu (TypeF id))

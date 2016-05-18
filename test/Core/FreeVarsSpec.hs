@@ -50,12 +50,6 @@ tests = testGroup "FreeVaes"
         |] :: Term.Term Type.Identifier Term.Identifier)
         res @?= Set.fromList [Term.Identifier "foo", Term.Identifier "bar"]
 
-    , testCase "retrieves one from a type abstraction" $ do
-        let res = FreeVars.freeVars ([termDSL|
-          (type-forall "foo" (type) (variable "bar"))
-        |] :: Term.Term Type.Identifier Term.Identifier)
-        res @?= Set.fromList [Term.Identifier "bar"]
-
     , testCase "retrieves many from a record introduction" $ do
         let res =
               FreeVars.freeVars
@@ -120,40 +114,6 @@ tests = testGroup "FreeVaes"
                   :: Type.Type Type.Identifier
                 )
         res @?= Set.fromList [Type.Identifier "foo"]
-
-    , testCase "retrieves none when shadowed by an abstraction" $ do
-        let res =
-              FreeVars.freeVarsType
-                ( Fix
-                  ( Type.ForAll
-                    ( Type.Identifier "foo" )
-                    Type.KindOfTypes
-                    ( Fix
-                      ( Type.Variable
-                        ( Type.Identifier "foo" )
-                      )
-                    )
-                  )
-                  :: Type.Type Type.Identifier
-                )
-        res @?= Set.fromList []
-
-    , testCase "retrieves one when not shadowed by an abstraction" $ do
-        let res =
-              FreeVars.freeVarsType
-                ( Fix
-                  ( Type.ForAll
-                    ( Type.Identifier "foo" )
-                    Type.KindOfTypes
-                    ( Fix
-                      ( Type.Variable
-                        ( Type.Identifier "bar" )
-                      )
-                    )
-                  )
-                  :: Type.Type Type.Identifier
-                )
-        res @?= Set.fromList [Type.Identifier "bar"]
 
     , testCase "retrieves two from a function" $ do
         let res =

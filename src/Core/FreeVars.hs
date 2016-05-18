@@ -55,10 +55,6 @@ freeVarsF termF =
     Term.Application leftVars rightVars ->
       Set.union leftVars (Set.unions rightVars)
 
-    -- A type abstration has a body that might contain free variables.
-    Term.TypeForAll _ _ vars ->
-      vars
-
     -- A record introduction has a term per record field, all of which
     -- might contain free variables.
     Term.RecordIntroduction mapping ->
@@ -99,11 +95,6 @@ freeTypeVarsF termF =
     Term.Application leftVars rightVars ->
       Set.union leftVars (Set.unions rightVars)
 
-    -- A type abstraction creates a binding for a type variable,
-    -- and thus eliminates a free type variable from its body.
-    Term.TypeForAll typeVar _ typeVars ->
-      Set.delete typeVar typeVars
-
     -- A record introduction has a term per record field, all of which
     -- might contain free type variables.
     Term.RecordIntroduction mapping ->
@@ -136,11 +127,6 @@ freeVarsTypeF typeF =
     -- type variables.
     Type.Function args body ->
       Set.union (Set.unions args) body
-
-    -- A universal quantification creates a binding for a type variable,
-    -- and thus eliminates a free type variable from its body.
-    Type.ForAll var _ vars ->
-      Set.delete var vars
 
 
 freeVarsType :: Ord typeId => Type typeId -> Set typeId

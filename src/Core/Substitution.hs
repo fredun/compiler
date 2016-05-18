@@ -60,12 +60,6 @@ substituteType subs (Fix (Fix.Ann ann typeF)) =
         in
           Fix (Fix.Ann newAnn (Type.Function newArgs newBody))
 
-      Type.ForAll arg kind body ->
-        let
-          bodySubs = Map.delete arg subs
-        in
-          Fix (Fix.Ann newAnn (Type.ForAll arg kind (substituteType bodySubs body)))
-
 
 substituteTerm :: Ord id => Substitution (TermF typeId) id -> Annotated (TermF typeId) id -> Annotated (TermF typeId) id
 substituteTerm subs (Fix (Fix.Ann ann termF)) =
@@ -99,9 +93,6 @@ substituteTerm subs (Fix (Fix.Ann ann termF)) =
           newArgs = map (substituteTerm subs) args
         in
           Fix (Fix.Ann newAnn (Term.Application newBody newArgs))
-
-      Term.TypeForAll arg kind body ->
-        Fix (Fix.Ann newAnn (Term.TypeForAll arg kind (substituteTerm subs body)))
 
       Term.RecordIntroduction mapping ->
         Fix (Fix.Ann newAnn (Term.RecordIntroduction (fmap (substituteTerm subs) mapping)))

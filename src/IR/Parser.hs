@@ -163,14 +163,6 @@ termF inner =
 
     <|>
 
-    Term.TypeForAll
-      <$ Trifecta.symbol "type-forall"
-      <*> typeIdentifier
-      <*> kind
-      <*> inner
-
-    <|>
-
     Term.Operation
       <$ Trifecta.symbol "operation"
       <*> operation inner

@@ -222,9 +222,6 @@ genTermF termF =
         (genCommaList rights)
         JS.JSNoAnnot
 
-    Term.TypeForAll _ _ body ->
-      body
-
     Term.RecordIntroduction mapping ->
       JS.JSObjectLiteral
         JS.JSNoAnnot
